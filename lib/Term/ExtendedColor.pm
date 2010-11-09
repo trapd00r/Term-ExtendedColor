@@ -1,156 +1,223 @@
 package Term::ExtendedColor;
+
+$VERSION = '0.10';
+
 require Exporter;
 @ISA = 'Exporter';
-our @EXPORT = qw(color_default color_by_name color $AUTORESET c);
-use Data::Dumper;
+our @EXPORT = qw(c get_colors);
+our @EXPORT_OK = qw(autoreset);
+
+use Data::Dumper::Concise;
 use Carp;
 
-our $AUTORESET;
+our $AUTORESET = 1;
 
-my $esc = "\e[38;5;";
-my $end = ($AUTORESET) ? "\e[0m" : '';
+my $fg = "\e[38;";
+my $bg = "\e[48;";
 
-my %color_map = (
-  ansi  =>
-  [
-    0 .. 15,
-  ],
-  red   =>
-  [
-    124,
-    160,
-    196,
-  ],
-  green => 
-  [
-    22,
-    40,
-    46,
-    64,
-    82,
-    106,
-    112,
-    118,
-    154,
-  ],
-  grey  =>
-  [
-    232 .. 255,
-  ],
-);
+my $end;
+
+sub autoreset {
+  $AUTORESET = shift;
+  if($AUTORESET > 0) {
+    $end = "\e[0m";
+  }
+  else {
+    $end = '';
+  }
+}
+
 
 my %color_names = (
   # light .. dark
-  red1    => 196,
-  red2    => 160,
-  red3    => 124,
-  red4    => 88,
-  red5    => 52,
+  red1    => '5;196',
+  red2    => '5;160',
+  red3    => '5;124',
+  red4    => '5;088',
+  red5    => '5;052',
 
-  green1  => 156,
-  green2  => 155,
-  green3  => 154,
-  green4  => 148,
-  green5  => 118,
-  green6  => 112,
-  green7  => 82,
-  green8  => 76,
-  green9  => 40,
-  green10 => 46,
-  green11 => 106,
-  green12 => 100,
+  green1  => '5;156',
+  green2  => '5;155',
+  green3  => '5;154',
+  green4  => '5;148',
+  green5  => '5;118',
+  green6  => '5;112',
+  green7  => '5;082',
+  green8  => '5;076',
+  green9  => '5;040',
+  green10 => '5;046',
+  green11 => '5;106',
+  green12 => '5;100',
 
-  yellow1 => 184,
-  yellow2 => 220,
-  yellow3 => 190,
-  yellow4 => 226,
-  yellow5 => 227,
+  blue1   => '5;39',
+  blue2   => '5;38',
+  blue3   => '5;33',
+  blue4   => '5;32',
+  blue5   => '5;31',
+  blue6   => '5;27',
+  blue7   => '5;26',
+  blue8   => '5;25',
+  blue9   => '5;21',
+  blue10  => '5;20',
+  blue11  => '5;19',
+  blue12  => '5;18',
+  blue13  => '5;17',
 
-  orange1 => 214,
-  orange2 => 178,
-  orange3 => 172,
-  orange4 => 208,
-  orange5 => 202,
-  orange6 => 166,
-  orange7 => 130,
+  yellow1 => '5;184',
+  yellow2 => '5;220',
+  yellow3 => '5;190',
+  yellow4 => '5;226',
+  yellow5 => '5;227',
+
+  orange1 => '5;214',
+  orange2 => '5;178',
+  orange3 => '5;172',
+  orange4 => '5;208',
+  orange5 => '5;202',
+  orange6 => '5;166',
+  orange7 => '5;130',
+
+  grey1   => '5;255',
+  grey2   => '5;254',
+  grey3   => '5;253',
+  grey4   => '5;252',
+  grey5   => '5;251',
+  grey6   => '5;250',
+  grey7   => '5;249',
+  grey8   => '5;248',
+  grey9   => '5;247',
+  grey10  => '5;246',
+  grey11  => '5;245',
+  grey12  => '5;244',
+  grey12  => '5;243',
+  grey12  => '5;242',
+  grey12  => '5;241',
+  grey12  => '5;240',
+  grey12  => '5;239',
+  grey12  => '5;238',
+  grey12  => '5;237',
+  grey12  => '5;236',
+  grey12  => '5;235',
+  grey12  => '5;234',
+  grey12  => '5;233',
+  grey12  => '5;232',
+
+  cerise1 => '5;197',
+  cerise2 => '5;161',
+  cerise3 => '5;125',
+
+  reset     => '0',
+  clear     => '0',
+  bold      => '1',
+  italic    => '3',
+  underline => '4',
+  blink     => '5',
+  reverse   => '7',
 );
+
 
 sub c {
   my $color_str = shift;
   my @data = @_;
-  return undef if(!defined($color_str));
+  return @data if(!defined($color_str));
 
   if(!defined($color_names{$color_str})) {
     return(@data);
     #croak("$color_str is not a valid name\n");
   }
 
-  @data = map{ "$esc$color_names{$color_str}m$_$end" } @data;
+  if(!(@data)) {
+    return("$fg$color_names{$color_str}m");
+  }
+
+
+  @data = map{ "$fg$color_names{$color_str}m$_$end" } @data;
+  #print Dumper \@data;
   return @data;
 }
 
-
-
-
-sub color {
-  my $color_index = shift;
-  my @data = @_;
-  return (undef) if(scalar(@data) == 0);
-
-  if(($color_index =~ m/^\d+$/) and ($color_index <= 255) and ($color_index >=0)) {
-    if($AUTORESET) {
-      @data = map{ "\e[38;5;$color_index" . 'm' . $_ . "\e[0m"; } @data;
-    }
-    else {
-      @data = map{ "\e[38;5;$color_index" . 'm' . $_; } @data;
-    }
-  }
-  elsif(exists($color_map{$color_index})) {
-    @data = map{ "\e[38;5;$color_map{$color_index}->[3]m$_\e[0m"} @data;
-    #print Dumper \%color_map;
-  }
-  return @data;
+sub get_colors {
+  return(\%color_names);
 }
 
 
-sub color_by_name {
-  my $color_name  = shift;
-  my $color_index = shift;
-  my @data = @_;
 
-  my $esc = ($color_name eq 'ansi') ? "\e[3" : "\e[38;5;";
-  my $end = ($AUTORESET) ? "\e[0m" : '';
 
-  if(!exists($color_map{$color_name})) {
-    return -1;
-  }
 
-  if($color_index == -1) {
-    if($color_name eq 'ansi') {
-      $esc = "\e[3";
-    }
-    $color_index = 0;
-    for(@data) {
-      if($color_index == scalar(@{$color_map{$color_name}})) {
-        $color_index = 0;
-      }
-      $_ = "$esc$color_map{$color_name}->[$color_index]m$_$end";
-      #print Dumper $_;
-      $color_index++;
-    }
-    return(@data);
-  }
-  elsif( ($color_index !~ /^\d+$/)
-      or ($color_index > scalar(@{$color_map{$color_name}})) ) {
-    print "UH\n";
-    return 1;
-  }
-  @data = map{ "\e[38;5;$color_map{$color_name}->[$color_index]m$_$end" } @data;
-  return(@data);
-}
-
-sub color_default {
+sub color_reset {
   return("\e[0m");
 }
 
 1;
+
+=pod
+
+=head1 NAME
+
+  Term::ExtendedColor - Access the extended colorset in UNIX systems
+
+=head1 SYNOPSIS
+
+  use Term::ExtendedColor; # c(), get_colors() imported by default
+
+  print c 'green10', "this is dark green\n";
+  print c('red1', "this is bright red\n");
+
+  Term::ExtendedColor::autoreset(0); # Turn off autoreset
+  print c 'cerise2', "This is cerize...\n";
+  print c 'bold', "... that turns into bold cerise\n\n";
+
+  print c('reset');
+
+  Term::ExtendedColor::autoreset(1); # Make sure to turn autoreset on again
+
+  # Print all attributes
+  my $colors = get_colors();
+
+  for my $attr(sort(keys(%{$colors}))) {
+    print c $attr, $attr, "\n" unless($colors->{$attr} =~ /^\d+$/);
+  }
+
+  print c('bold', c('blue2', "> Non-color attributes:\n"));
+  for(qw(italic underline blink reverse bold)) {
+    print c $_, "$_\n";
+  }
+
+=head1 DESCRIPTION
+
+c()
+  expects a string with an attribute attached to it as its first argument,
+  and optionally any number of additional strings which the operation will be
+  performed upon.
+  If the internal $AUTORESET variabe is non-zero (default), the list of strings
+  will be mapped with the attribute in front and the 'reset' attribute in the
+  end. This is for convience, but the behaviour can be changed by calling
+  Term::ExtendedColor::autoreset(0). Note that you will have to reset manually
+  though, or else the set attributes will last after your script is finished,
+  resulting in the prompt having strange colors.
+
+  If you pass an invalid attribute, the original data will be returned
+  unmodified.
+
+get_colors()
+  returns a hash reference with all available attributes.
+
+=head1 SEE ALSO
+
+  Term::ANSIColor
+
+=head1 AUTHOR
+
+Written by Magnus Woldrich
+
+=head1 COPYRIGHT
+
+Copyright 2010 Magnus Woldrich <magnus@trapd00r.se>. This program is free
+software; you may redistribute it and/or modify it under the same terms as
+Perl itself.
+
+=cut
+
+
+
+
