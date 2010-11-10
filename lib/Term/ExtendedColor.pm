@@ -4,32 +4,31 @@ $VERSION = '0.10';
 
 require Exporter;
 @ISA = 'Exporter';
-our @EXPORT = qw(c get_colors);
-our @EXPORT_OK = qw(autoreset);
+our @EXPORT = qw(color uncolor get_colors);
 
-use Data::Dumper::Concise;
+# We need to access the autoreset function by using the fully qualified name.
+# If we populate @EXPORT_OK the exported functions in @EXPORT doesnt get
+# exported at all, for some reason. This is 'intended behaviour', according to
+# #perl.
+#our @EXPORT_OK = qw(autoreset);
+
+
+#use Data::Dumper::Concise;
 use Carp;
 
 our $AUTORESET = 1;
 
 my $fg = "\e[38;";
 my $bg = "\e[48;";
-
 my $end;
 
-sub autoreset {
-  $AUTORESET = shift;
-  if($AUTORESET > 0) {
-    $end = "\e[0m";
-  }
-  else {
-    $end = '';
-  }
-}
-
-
+# There a no way to give these meaningful names.
+# The X11 rgb names doesn't match, neither does
+# any SVG or HTML colorset.
+# Will probably add the colors hex values as another field.
+# Will probably remap all of these colors, creating some kind of pattern.
 my %color_names = (
-  # light .. dark
+  # from light to dark.
   red1    => '5;196',
   red2    => '5;160',
   red3    => '5;124',
@@ -116,7 +115,7 @@ my %color_names = (
 );
 
 
-sub c {
+sub color {
   my $color_str = shift;
   my @data = @_;
   return @data if(!defined($color_str));
@@ -130,19 +129,36 @@ sub c {
     return("$fg$color_names{$color_str}m");
   }
 
-
   @data = map{ "$fg$color_names{$color_str}m$_$end" } @data;
   #print Dumper \@data;
   return @data;
 }
 
+sub uncolor {
+  my @data = @_;
+  return undef if(!@data);
+
+  for(@data) {
+    s/(?:\e|\033)\[[0-9]+(?:;[0-9]+)?(;[0-9]+)m//g;
+    s/(?:\e|\033)\[[0-9]+m//g;
+  }
+  return(@data);
+}
+
+
 sub get_colors {
   return(\%color_names);
 }
 
-
-
-
+sub autoreset {
+  $AUTORESET = shift;
+  if($AUTORESET > 0) {
+    $end = "\e[0m";
+  }
+  else {
+    $end = '';
+  }
+}
 
 sub color_reset {
   return("\e[0m");
@@ -154,20 +170,20 @@ sub color_reset {
 
 =head1 NAME
 
-  Term::ExtendedColor - Access the extended colorset in UNIX systems
+  Term::ExtendedColor - Color screen output using extended escape sequences
 
 =head1 SYNOPSIS
 
-  use Term::ExtendedColor; # c(), get_colors() imported by default
+  use Term::ExtendedColor; # color(), uncolor(), get_colors() imported
 
-  print c 'green10', "this is dark green\n";
-  print c('red1', "this is bright red\n");
+  print color 'green10', "this is dark green\n";
+  print color('red1', "this is bright red\n");
 
   Term::ExtendedColor::autoreset(0); # Turn off autoreset
-  print c 'cerise2', "This is cerize...\n";
-  print c 'bold', "... that turns into bold cerise\n\n";
+  print color 'cerise2', "This is cerize...\n";
+  print color 'bold', "... that turns into bold cerise\n\n";
 
-  print c('reset');
+  print color('reset');
 
   Term::ExtendedColor::autoreset(1); # Make sure to turn autoreset on again
 
@@ -175,17 +191,17 @@ sub color_reset {
   my $colors = get_colors();
 
   for my $attr(sort(keys(%{$colors}))) {
-    print c $attr, $attr, "\n" unless($colors->{$attr} =~ /^\d+$/);
+    print color $attr, $attr, "\n" unless($colors->{$attr} =~ /^\d+$/);
   }
 
-  print c('bold', c('blue2', "> Non-color attributes:\n"));
+  print color('bold', color('blue2', "> Non-color attributes:\n"));
   for(qw(italic underline blink reverse bold)) {
-    print c $_, "$_\n";
+    print color $_, "$_\n";
   }
 
 =head1 DESCRIPTION
 
-c()
+color()
   expects a string with an attribute attached to it as its first argument,
   and optionally any number of additional strings which the operation will be
   performed upon.
@@ -198,6 +214,9 @@ c()
 
   If you pass an invalid attribute, the original data will be returned
   unmodified.
+
+uncolor()
+  strips the input data from escape sequences.
 
 get_colors()
   returns a hash reference with all available attributes.
