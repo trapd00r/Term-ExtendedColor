@@ -7,11 +7,10 @@ require Exporter;
 our @EXPORT = qw(color uncolor get_colors);
 
 # We need to access the autoreset function by using the fully qualified name.
-# If we populate @EXPORT_OK the exported functions in @EXPORT doesnt get
-# exported at all, for some reason. This is 'intended behaviour', according to
-# #perl.
-#our @EXPORT_OK = qw(autoreset);
-
+# If we try to import functions from @EXPORT_OK, the exported functions in
+# @EXPORT doesnt get exported at all, for some reason.
+# This is 'intended behaviour', according to #perl.
+our @EXPORT_OK = qw(autoreset);
 
 #use Data::Dumper::Concise;
 use Carp;
@@ -130,7 +129,6 @@ sub color {
   }
 
   @data = map{ "$fg$color_names{$color_str}m$_$end" } @data;
-  #print Dumper \@data;
   return @data;
 }
 
