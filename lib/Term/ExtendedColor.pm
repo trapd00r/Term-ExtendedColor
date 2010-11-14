@@ -4,7 +4,7 @@ $VERSION = '0.10';
 
 require Exporter;
 @ISA = 'Exporter';
-our @EXPORT = qw(color uncolor get_colors);
+our @EXPORT = qw(color uncolor get_colors set_color);
 
 # We need to access the autoreset function by using the fully qualified name.
 # If we try to import functions from @EXPORT_OK, the exported functions in
@@ -12,7 +12,7 @@ our @EXPORT = qw(color uncolor get_colors);
 # This is 'intended behaviour', according to #perl.
 our @EXPORT_OK = qw(autoreset);
 
-#use Data::Dumper::Concise;
+use Data::Dumper::Concise;
 use Carp;
 
 our $AUTORESET = 1;
@@ -87,18 +87,18 @@ my %color_names = (
   grey10  => '5;246',
   grey11  => '5;245',
   grey12  => '5;244',
-  grey12  => '5;243',
-  grey12  => '5;242',
-  grey12  => '5;241',
-  grey12  => '5;240',
-  grey12  => '5;239',
-  grey12  => '5;238',
-  grey12  => '5;237',
-  grey12  => '5;236',
-  grey12  => '5;235',
-  grey12  => '5;234',
-  grey12  => '5;233',
-  grey12  => '5;232',
+  grey13  => '5;243',
+  grey14  => '5;242',
+  grey15  => '5;241',
+  grey16  => '5;240',
+  grey17  => '5;239',
+  grey18  => '5;238',
+  grey19  => '5;237',
+  grey20  => '5;236',
+  grey21  => '5;235',
+  grey22  => '5;234',
+  grey23  => '5;233',
+  grey24  => '5;232',
 
   cerise1 => '5;197',
   cerise2 => '5;161',
@@ -113,6 +113,25 @@ my %color_names = (
   reverse   => '7',
 );
 
+#my %colors = (
+#  red1 => {
+#    '5;196' => 'ff0000',
+#  },
+#  red2 => {
+#    '5;160' => 'd70000',
+#  },
+#  red3 => {
+#    '5;124' => 'af0000',
+#  },
+#  red4 => {
+#    '5;088' => '870000',
+#  },
+#  red5 => {
+#    '5;052' => '5f0000',
+#  },
+#);
+
+
 
 sub color {
   my $color_str = shift;
@@ -120,16 +139,16 @@ sub color {
   return @data if(!defined($color_str));
 
   if(!defined($color_names{$color_str})) {
-    return(@data);
-    #croak("$color_str is not a valid name\n");
+    #return(@data);
+    croak("$color_str is not a valid name\n");
   }
 
   if(!(@data)) {
     return("$fg$color_names{$color_str}m");
   }
 
-  @data = map{ "$fg$color_names{$color_str}m$_$end" } @data;
-  return @data;
+  map{ $_ = "$fg$color_names{$color_str}m$_$end" } @data;
+  return(join('', @data)); # FIXME
 }
 
 sub uncolor {
@@ -141,6 +160,21 @@ sub uncolor {
     s/(?:\e|\033)\[[0-9]+m//g;
   }
   return(@data);
+}
+
+sub set_color {
+  my $index = shift; # color no 8
+  my $color = shift; # ff0000
+
+  if(($index < 0) or ($index > 255)) {
+    croak("Invalid index: $index\n");
+  }
+  if($color !~ /^([A-Fa-f0-9]{6}$)/) {
+    croak("Invalid hex: $color\n");
+  }
+
+  my($r_hex, $g_hex, $b_hex) = $color =~ /(..)(..)(..)/g;
+  return("\e]4;$index;rgb:$r_hex/$g_hex/$b_hex\e\\");
 }
 
 
@@ -196,6 +230,11 @@ sub color_reset {
   for(qw(italic underline blink reverse bold)) {
     print color $_, "$_\n";
   }
+
+  # Change some colors
+  my $first = set_color(0, ff0000);
+  my $new_
+
 
 =head1 DESCRIPTION
 
