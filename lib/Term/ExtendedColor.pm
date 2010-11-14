@@ -12,7 +12,7 @@ our @EXPORT = qw(color uncolor get_colors set_color);
 # This is 'intended behaviour', according to #perl.
 our @EXPORT_OK = qw(autoreset);
 
-use Data::Dumper::Concise;
+#use Data::Dumper::Concise;
 use Carp;
 
 our $AUTORESET = 1;
@@ -183,6 +183,7 @@ sub get_colors {
 }
 
 sub autoreset {
+  # FIXME
   $AUTORESET = shift;
   if($AUTORESET > 0) {
     $end = "\e[0m";
