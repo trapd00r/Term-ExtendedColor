@@ -18,7 +18,7 @@ use Carp;
 our $AUTORESET = 1;
 
 my $fg = "\e[38;";
-my $bg = "\e[48;";
+my $bg = "\e[48;"; #FIXME
 my $end;
 
 # There a no way to give these meaningful names.
@@ -139,13 +139,16 @@ sub color {
   return @data if(!defined($color_str));
 
   if(!defined($color_names{$color_str})) {
-    #return(@data);
-    croak("$color_str is not a valid name\n");
+    return(@data);
+    #croak("$color_str is not a valid name\n");
   }
 
   if(!(@data)) {
+    # Works just like the color() function in Term::ANSIColor
     return("$fg$color_names{$color_str}m");
   }
+
+  ($end) = ($AUTORESET) ? "\e[38;0m" : '';
 
   map{ $_ = "$fg$color_names{$color_str}m$_$end" } @data;
   return(join('', @data)); # FIXME
@@ -167,7 +170,7 @@ sub set_color {
   my $color = shift; # ff0000
 
   if(($index < 0) or ($index > 255)) {
-    croak("Invalid index: $index\n");
+    croak("Invalid index: $index. Valid numbers are 0-255\n");
   }
   if($color !~ /^([A-Fa-f0-9]{6}$)/) {
     croak("Invalid hex: $color\n");
@@ -183,21 +186,9 @@ sub get_colors {
 }
 
 sub autoreset {
-  # FIXME
   $AUTORESET = shift;
-  if($AUTORESET > 0) {
-    $end = "\e[0m";
-  }
-  else {
-    $end = '';
-  }
+  ($end) = ($AUTORESET) ? "\e[38;0m" : '';
 }
-
-sub color_reset {
-  return("\e[0m");
-}
-
-1;
 
 =pod
 
@@ -233,8 +224,35 @@ sub color_reset {
   }
 
   # Change some colors
-  my $first = set_color(0, ff0000);
-  my $new_
+  my $first = set_color(0, ff0000); # Change the first ANSI color to red
+
+  # Change the greyscale spectrum to a range from fef502 (yellow) to e70f30
+  # (red)
+
+  my $base = 'ffff00';
+  for(232..255) { # Greyscale colors
+    #  ff, ff, 00
+    my($r, $g, $b) = $base =~ /(..)(..)(..)/;
+
+    $r = hex($r); # 255
+    $g = hex($g); # 255
+    $b = hex($b); # 0
+
+    $r -= 1;  # 254
+    $g -= 10; # 245
+    $b += 2;  # 2
+
+    $r = sprintf("%.2x", $r);
+    $g = sprintf("%.2x", $g);
+    $b = sprintf("%.2x", $b);
+
+    $base = $r . $g . $b;
+
+    my $new = set_color($_, $base);
+    print $new
+  }
+
+
 
 
 =head1 DESCRIPTION
@@ -248,13 +266,16 @@ color()
   end. This is for convience, but the behaviour can be changed by calling
   Term::ExtendedColor::autoreset(0). Note that you will have to reset manually
   though, or else the set attributes will last after your script is finished,
-  resulting in the prompt having strange colors.
+  resulting in the prompt looking funny.
 
   If you pass an invalid attribute, the original data will be returned
   unmodified.
 
 uncolor()
   strips the input data from escape sequences.
+
+set_color()
+  change color index n value to color hex.
 
 get_colors()
   returns a hash reference with all available attributes.
@@ -276,5 +297,4 @@ Perl itself.
 =cut
 
 
-
-
+1;
