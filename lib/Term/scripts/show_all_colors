@@ -1,0 +1,12 @@
+#!/usr/bin/perl
+use strict;
+use Term::ExtendedColor;
+
+my $colors = get_colors();
+
+$\ = "\n";
+Term::ExtendedColor::autoreset(1);
+
+for my $name(sort(keys(%{$colors}))) {
+  print color($name, $name);
+}
