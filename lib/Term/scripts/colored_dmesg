@@ -1,0 +1,112 @@
+#!/usr/bin/perl
+use strict;
+use Term::ExtendedColor;
+
+open(my $fh, '-|', 'dmesg') or die($!);
+chomp(my @data = <$fh>);
+close($fh);
+
+# Emulate say()
+$\ = "\n";
+
+# Enable autoreset
+Term::ExtendedColor::autoreset(1);
+
+
+for(@data) {
+  $_ =~ s/(usb)/color('green5', color('bold', $1))/egi;
+  $_ =~ s/(disconnect)/color('red4', color('bold', $1))/egi;
+
+  # Disks detected
+  if($_ =~ /(^sd.*)\[(.+)\](.+)/) {
+    my $pre  = color('grey1', $1) . color('bold', '[');
+    my $disk = color('blue4', $2) . color('bold', ']');
+    my $post = color('grey1', $3);
+    print "$pre$disk$post";
+  }
+  # Out of memory
+  elsif($_ =~ /^(Out of memory): (.+) process (\d+) \((.+)\)/) {
+    my $pre  = color('reverse', $1) . ': ';
+    my $kill = color('bold', color('red3', $2));
+    my $pid  = color('bold', color('red4', $3));
+    my $app  = color('red1', $4);
+    my $post = color('reverse', $5);
+    print "$pre$kill $pid ($app) $post";
+  }
+  elsif($_ =~ /^(Killed) (process) (\d+) \((.+)\)/) {
+    my $pre  = color('reverse', $1) . ': ';
+    my $kill = color('bold', color('red3', $2));
+    my $pid  = color('bold', color('red4', $3));
+    my $app  = color('red1', $4);
+    my $post = color('reverse', $5);
+    print "$pre$kill $pid ($app) $post";
+  }
+  # segfault     app    PID
+  elsif($_ =~ /^(.+)\[(\d+)\]: (segfault) (.+)/) {
+    my $app  = color('bold', $1);
+    my $pid  = color('bold', color('reverse', color('green1', $2)));
+    my $seg  = color('bold', $3);
+    my $post = color('grey10', $4);
+
+    print "$pid: $app - $seg $post";
+  }
+
+  elsif($_ =~ /(.+) (Direct-Access)\s+(.+)/) {
+    my $pre   = color('grey15', $1);
+    my $acc   = color('grey10', $2);
+    my $model = color('orange2', color('bold', $3));;
+
+    print "$pre $acc $model";
+  }
+
+  # EXT4-fs sdh1 warning: maximal mount count reached, running e2fsck is
+  # recommended
+  #
+  # and others
+  elsif($_ =~ /(.+) \((.+)\): (.+)/) {
+    my $fs   = color('bold', $1);
+    my $disk = color('bold', color('cerise2', $2));;
+    my $post = color('bold', $3);
+
+    print "$fs $disk $post";
+  }
+
+  elsif($_ =~ /^TCP: Peer/) {
+    print color('italic', color('grey20',  $_));
+  }
+  elsif($_ =~ /^(ACPI): (.+)/) {
+    print color('bold', $1) . ": $2";
+  }
+
+  else {
+    print color('grey3', $_);
+  }
+}
+
+=pod
+
+=head1 NAME
+
+  colored-dmesg - colorize the dmesg output
+
+=head1 DESCRIPTION
+
+  colored_dmesg demonstrates the color functions exported by
+  Term::ExtendedColor.
+
+=head1 AUTHOR
+
+Written by Magnus Woldrich
+
+=head1 REPORTING BUGS
+
+Report bugs to trapd00r@trapd00r.se
+
+=head1 COPYRIGHT
+
+Copyright (C) 2010 Magnus Woldrich
+
+License GPLv2
+
+=cut
+
