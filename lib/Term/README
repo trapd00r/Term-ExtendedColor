@@ -1,0 +1,89 @@
+NAME
+      Term::ExtendedColor - Color screen output using extended escape sequences
+
+SYNOPSIS
+      use Term::ExtendedColor; # color(), uncolor(), get_colors() imported
+
+      print color 'green10', "this is dark green\n";
+      print color('red1', "this is bright red\n");
+
+      Term::ExtendedColor::autoreset(0); # Turn off autoreset
+      print color 'cerise2', "This is cerize...\n";
+      print color 'bold', "... that turns into bold cerise\n\n";
+
+      print color('reset');
+
+      Term::ExtendedColor::autoreset(1); # Make sure to turn autoreset on again
+
+      # Print all attributes
+      my $colors = get_colors();
+
+      for my $attr(sort(keys(%{$colors}))) {
+        print color $attr, $attr, "\n" unless($colors->{$attr} =~ /^\d+$/);
+      }
+
+      print color('bold', color('blue2', "> Non-color attributes:\n"));
+      for(qw(italic underline blink reverse bold)) {
+        print color $_, "$_\n";
+      }
+
+      # Change some colors
+      my $first = set_color(0, ff0000); # Change the first ANSI color to red
+
+      # Change the greyscale spectrum to a range from fef502 (yellow) to e70f30
+      # (red)
+
+      my $base = 'ffff00';
+      for(232..255) { # Greyscale colors
+        #  ff, ff, 00
+        my($r, $g, $b) = $base =~ /(..)(..)(..)/;
+
+        $r = hex($r); # 255
+        $g = hex($g); # 255
+        $b = hex($b); # 0
+
+        $r -= 1;  # 254
+        $g -= 10; # 245
+        $b += 2;  # 2
+
+        $r = sprintf("%.2x", $r);
+        $g = sprintf("%.2x", $g);
+        $b = sprintf("%.2x", $b);
+
+        $base = $r . $g . $b;
+
+        my $new = set_color($_, $base);
+        print $new
+      }
+
+DESCRIPTION
+    color() expects a string with an attribute attached to it as its first
+    argument, and optionally any number of additional strings which the
+    operation will be performed upon. If the internal $AUTORESET variabe is
+    non-zero (default), the list of strings will be mapped with the
+    attribute in front and the 'reset' attribute in the end. This is for
+    convience, but the behaviour can be changed by calling
+    Term::ExtendedColor::autoreset(0). Note that you will have to reset
+    manually though, or else the set attributes will last after your script
+    is finished, resulting in the prompt looking funny.
+
+      If you pass an invalid attribute, the original data will be returned
+      unmodified.
+
+    uncolor() strips the input data from escape sequences.
+
+    set_color() change color index n value to color hex.
+
+    get_colors() returns a hash reference with all available attributes.
+
+SEE ALSO
+      Term::ANSIColor
+
+AUTHOR
+    Written by Magnus Woldrich
+
+COPYRIGHT
+    Copyright 2010 Magnus Woldrich <magnus@trapd00r.se>. This program is
+    free software; you may redistribute it and/or modify it under the same
+    terms as Perl itself.
+
