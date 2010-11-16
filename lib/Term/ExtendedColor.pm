@@ -4,7 +4,7 @@ $VERSION = '0.10';
 
 require Exporter;
 @ISA = 'Exporter';
-our @EXPORT = qw(color uncolor get_colors set_color);
+our @EXPORT = qw(uncolor get_colors set_color fg bg clear);
 
 # We need to access the autoreset function by using the fully qualified name.
 # If we try to import functions from @EXPORT_OK, the exported functions in
@@ -18,119 +18,123 @@ use Carp;
 our $AUTORESET = 1;
 
 my $fg = "\e[38;";
-my $bg = "\e[48;"; #FIXME
-my $end;
+my $bg = "\e[48;";
+
+my($start, $end);
 
 # There a no way to give these meaningful names.
 # The X11 rgb names doesn't match, neither does
 # any SVG or HTML colorset.
 # Will probably add the colors hex values as another field.
 # Will probably remap all of these colors, creating some kind of pattern.
+
+
+#
+#  blue1   => '5;39',
+#  blue2   => '5;38',
+#  blue3   => '5;33',
+#  blue4   => '5;32',
+#  blue5   => '5;31',
+#  blue6   => '5;27',
+#  blue7   => '5;26',
+#  blue8   => '5;25',
+#  blue9   => '5;21',
+#  blue10  => '5;20',
+#  blue11  => '5;19',
+#  blue12  => '5;18',
+#  blue13  => '5;17',
+#
+#  yellow1 => '5;184',
+#  yellow2 => '5;220',
+#  yellow3 => '5;190',
+#  yellow4 => '5;226',
+#  yellow5 => '5;227',
+#
+#  orange1 => '5;214',
+#  orange2 => '5;178',
+#  orange3 => '5;172',
+#  orange4 => '5;208',
+#  orange5 => '5;202',
+#  orange6 => '5;166',
+#  orange7 => '5;130',
+#
+#  cerise1 => '5;197',
+#  cerise2 => '5;161',
+#  cerise3 => '5;125',
+
+
+
+
+
 my %color_names = (
-  # from light to dark.
-  red1    => '5;196',
-  red2    => '5;160',
-  red3    => '5;124',
-  red4    => '5;088',
-  red5    => '5;052',
 
-  green1  => '5;156',
-  green2  => '5;155',
-  green3  => '5;154',
-  green4  => '5;148',
-  green5  => '5;118',
-  green6  => '5;112',
-  green7  => '5;082',
-  green8  => '5;076',
-  green9  => '5;040',
-  green10 => '5;046',
-  green11 => '5;106',
-  green12 => '5;100',
+  reset     => 0,
+  clear     => 0,
+  bold      => 1,
+  italic    => 3,
+  underline => 4,
+  reverse   => 7,
 
-  blue1   => '5;39',
-  blue2   => '5;38',
-  blue3   => '5;33',
-  blue4   => '5;32',
-  blue5   => '5;31',
-  blue6   => '5;27',
-  blue7   => '5;26',
-  blue8   => '5;25',
-  blue9   => '5;21',
-  blue10  => '5;20',
-  blue11  => '5;19',
-  blue12  => '5;18',
-  blue13  => '5;17',
+  # light -> dark
 
-  yellow1 => '5;184',
-  yellow2 => '5;220',
-  yellow3 => '5;190',
-  yellow4 => '5;226',
-  yellow5 => '5;227',
+  red1    => '5;196',     # => 'ff0000',
+  red2    => '5;160',     # => 'd70000',
+  red3    => '5;124',     # => 'af0000',
+  red4    => '5;088',     # => '870000',
+  red5    => '5;052',     # => '5f0000',
 
-  orange1 => '5;214',
-  orange2 => '5;178',
-  orange3 => '5;172',
-  orange4 => '5;208',
-  orange5 => '5;202',
-  orange6 => '5;166',
-  orange7 => '5;130',
-
-  grey1   => '5;255',
-  grey2   => '5;254',
-  grey3   => '5;253',
-  grey4   => '5;252',
-  grey5   => '5;251',
-  grey6   => '5;250',
-  grey7   => '5;249',
-  grey8   => '5;248',
-  grey9   => '5;247',
-  grey10  => '5;246',
-  grey11  => '5;245',
-  grey12  => '5;244',
-  grey13  => '5;243',
-  grey14  => '5;242',
-  grey15  => '5;241',
-  grey16  => '5;240',
-  grey17  => '5;239',
-  grey18  => '5;238',
-  grey19  => '5;237',
-  grey20  => '5;236',
-  grey21  => '5;235',
-  grey22  => '5;234',
-  grey23  => '5;233',
-  grey24  => '5;232',
-
-  cerise1 => '5;197',
-  cerise2 => '5;161',
-  cerise3 => '5;125',
-
-  reset     => '0',
-  clear     => '0',
-  bold      => '1',
-  italic    => '3',
-  underline => '4',
-  blink     => '5',
-  reverse   => '7',
+  green1  => '5;156',     # => 'afff87',
+  green2  => '5;150',     # => 'afd787',
+  green3  => '5;120',     # => '87ff87',
+  green4  => '5;114',     # => '87d787',
+  green5  => '5;084',     # => '5fff87',
+  green6  => '5;078',     # => '5fd787',
+  green7  => '5;155',     # => 'afff5f',
+  green8  => '5;149',     # => 'afd75f',
+  green9  => '5;119',     # => '87ff5f',
+  green10 => '5;113',     # => '87d75f',
+  green11 => '5;083',     # => '5fff5f',
+  green12 => '5;077',     # => '5fd75f',
+  green13 => '5;047',     # => '00ff5f',
+  green14 => '5;041',     # => '00d75f',
+  green15 => '5;118',     # => '87ff00',
+  green16 => '5;112',     # => '87d700',
+  green17 => '5;082',     # => '5fff00',
+  green18 => '5;076',     # => '5fd700',
+  green19 => '5;046',     # => '00ff00',
+  green20 => '5;040',     # => '00d700',
+  green21 => '5;034',     # => '00af00',
+  green22 => '5;028',     # => '008700',
+  green23 => '5;022',     # => '005f00',
+  green24 => '5;107',     # => '87af5f',
+  green25 => '5;071',     # => '5faf5f',
+  green26 => '5;070',     # => '5faf00',
+  green27 => '5;064',     # => '5f8700',
+  green28 => '5;065',     # => '5f875f',
 );
 
-#my %colors = (
-#  red1 => {
-#    '5;196' => 'ff0000',
-#  },
-#  red2 => {
-#    '5;160' => 'd70000',
-#  },
-#  red3 => {
-#    '5;124' => 'af0000',
-#  },
-#  red4 => {
-#    '5;088' => '870000',
-#  },
-#  red5 => {
-#    '5;052' => '5f0000',
-#  },
-#);
 
+our $FG;
+our $BG;
+
+sub fg {
+  # Call to fg() with zero args resets to defaults
+  if(!@_) {
+    return("\e[38;0m");
+  }
+
+  $FG = ($FG) ? 0 : 1;
+  color(@_);
+}
+
+sub bg {
+  if(!@_) {
+    return("\e[38;0m");
+  }
+
+  $BG = ($BG) ? 0 : 1;
+  color(@_);
+}
 
 
 sub color {
@@ -138,19 +142,23 @@ sub color {
   my @data = @_;
   return @data if(!defined($color_str));
 
-  if(!defined($color_names{$color_str})) {
+  if(!exists($color_names{$color_str})) {
     return(@data);
     #croak("$color_str is not a valid name\n");
   }
 
+  ($start) = ($FG)        ? "\e[38;" : "\e[48;";
+  ($end)   = ($AUTORESET) ? "\e[38;0m"  : '';
+
   if(!(@data)) {
     # Works just like the color() function in Term::ANSIColor
-    return("$fg$color_names{$color_str}m");
+    return("$start$color_names{$color_str}m");
   }
 
-  ($end) = ($AUTORESET) ? "\e[38;0m" : '';
+  map{ $_ = "$start$color_names{$color_str}m$_$end" } @data;
 
-  map{ $_ = "$fg$color_names{$color_str}m$_$end" } @data;
+  # Restore state
+  ($FG, $BG) = (0, 0);
   return(join('', @data)); # FIXME
 }
 
@@ -184,6 +192,13 @@ sub set_color {
 sub get_colors {
   return(\%color_names);
 }
+
+sub clear {
+  if(!@_) {
+    return("$fg$color_names{clear}m");
+  }
+}
+
 
 sub autoreset {
   $AUTORESET = shift;
