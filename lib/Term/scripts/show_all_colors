@@ -2,11 +2,10 @@
 use strict;
 use Term::ExtendedColor;
 
+$\ = "\n";
+
 my $colors = get_colors();
 
-$\ = "\n";
-Term::ExtendedColor::autoreset(1);
-
-for my $name(sort(keys(%{$colors}))) {
-  print color($name, $name);
+for my $color(sort(keys(%{$colors}))) {
+  print bg($color, '  x  '), "\t", fg($color, $color);
 }
