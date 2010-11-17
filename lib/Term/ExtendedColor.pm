@@ -122,7 +122,6 @@ sub fg {
   if(!@_) {
     return("\e[38;0m");
   }
-
   $FG = ($FG) ? 0 : 1;
   color(@_);
 }
@@ -143,8 +142,7 @@ sub color {
   return @data if(!defined($color_str));
 
   if(!exists($color_names{$color_str})) {
-    return(@data);
-    #croak("$color_str is not a valid name\n");
+    return($color_str);
   }
 
   ($start) = ($FG)        ? "\e[38;" : "\e[48;";
@@ -177,11 +175,18 @@ sub set_color {
   my $index = shift; # color no 8
   my $color = shift; # ff0000
 
+  if(!defined($index) or ($index eq '')) {
+    confess("Need index color (0..255)");
+  }
+  if(!defined($color) or ($color eq '')) {
+    confess("Need color specification in valid hex");
+  }
+
   if(($index < 0) or ($index > 255)) {
-    croak("Invalid index: $index. Valid numbers are 0-255\n");
+    confess("Invalid index: $index. Valid numbers are 0-255\n");
   }
   if($color !~ /^([A-Fa-f0-9]{6}$)/) {
-    croak("Invalid hex: $color\n");
+    confess("Invalid hex: $color\n");
   }
 
   my($r_hex, $g_hex, $b_hex) = $color =~ /(..)(..)(..)/g;
