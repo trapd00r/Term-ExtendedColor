@@ -14,14 +14,14 @@ Term::ExtendedColor::autoreset(1);
 
 
 for(@data) {
-  $_ =~ s/(usb)/fg('green5', bg('bold', $1))/egi;
-  $_ =~ s/(disconnect)/bg('green4', fg('bold', $1))/egi;
+  $_ =~ s/(usb)/fg('blue12', bg('bold', $1))/egi;
+  $_ =~ s/(disconnect)/bg('magenta16', fg('bold', $1))/egi;
 
   # Disks detected
   if($_ =~ /(^sd.*)\[(.+)\](.+)/) {
-    my $pre  = fg('green28', $1) . fg('bold', '[');
-    my $disk = fg('green18', $2) . fg('bold', ']');
-    my $post = fg('green28', $3);
+    my $pre  = fg('blue4', $1) . fg('bold', '[');
+    my $disk = fg('yellow17', $2) . fg('bold', ']');
+    my $post = fg('blue1', $3);
     print "$pre$disk$post";
   }
   # Out of memory
@@ -44,17 +44,17 @@ for(@data) {
   # segfault     app    PID
   elsif($_ =~ /^(.+)\[(\d+)\]: (segfault) (.+)/) {
     my $app  = fg('bold', $1);
-    my $pid  = fg('bold', fg('reverse', fg('green28', $2)));
+    my $pid  = fg('bold', fg('reverse', fg('blue9', $2)));
     my $seg  = fg('bold', $3);
-    my $post = fg('green28', $4);
+    my $post = fg('blue9', $4);
 
     print "$pid: $app - $seg $post";
   }
 
   elsif($_ =~ /(.+) (Direct-Access)\s+(.+)/) {
-    my $pre   = fg('green28', $1);
-    my $acc   = fg('green28', $2);
-    my $model = fg('green20', fg('bold', $3));;
+    my $pre   = fg('blue9', $1);
+    my $acc   = fg('blue9', $2);
+    my $model = fg('magenta25', fg('bold', $3));;
 
     print "$pre $acc $model";
   }
@@ -72,7 +72,7 @@ for(@data) {
   }
 
   elsif($_ =~ /^TCP: Peer/) {
-    print fg('italic', fg('green20',  $_));
+    print fg('italic', fg('gray20',  $_));
   }
   elsif($_ =~ /^(ACPI): (.+)/) {
     print fg('bold', $1) . ": $2";
