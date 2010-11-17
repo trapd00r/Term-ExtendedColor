@@ -261,6 +261,8 @@ sub color {
   my @data = @_;
   return @data if(!defined($color_str));
 
+  $color_str =~ s/grey/gray/; # Alternative spelling
+
   if(!exists($color_names{$color_str})) {
     return($color_str);
   }
