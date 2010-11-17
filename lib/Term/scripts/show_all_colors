@@ -2,10 +2,21 @@
 use strict;
 use Term::ExtendedColor;
 
-$\ = "\n";
-
 my $colors = get_colors();
+my @sorted_colors;
 
-for my $color(sort(keys(%{$colors}))) {
-  print bg($color, '  x  '), "\t", fg($color, $color);
+
+# We want to sort by 001 .. 010 .. 042
+for my $color(keys(%{$colors})) {
+  $color =~ m/(\d+)$/;
+  my $num = sprintf("%03d", $1);
+  $color =~ s/(\d+)$/$num/;
+  push(@sorted_colors, $color);
+}
+
+for(sort(@sorted_colors)) {
+  s/([a-z]+)0+(\d+)$/$1$2/;
+  print bg($_, '  x  ');
+  print "\t";
+  print fg($_, $_), "\n";
 }
