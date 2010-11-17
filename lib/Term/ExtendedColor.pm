@@ -73,6 +73,7 @@ my %color_names = (
   bold      => 1,
   italic    => 3,
   underline => 4,
+  blink     => 5,
   reverse   => 7,
 
   # light -> dark
@@ -179,7 +180,7 @@ sub set_color {
     confess("Need index color (0..255)");
   }
   if(!defined($color) or ($color eq '')) {
-    confess("Need color specification in valid hex");
+  confess("Need color specification in valid hex");
   }
 
   if(($index < 0) or ($index > 255)) {
@@ -218,66 +219,90 @@ sub autoreset {
 
 =head1 SYNOPSIS
 
-  use Term::ExtendedColor; # color(), uncolor(), get_colors() imported
+    # fg(), bg(), set_color(), uncolor(), get_colors() imported
+    use Term::ExtendedColor;
 
-  print color 'green10', "this is dark green\n";
-  print color('red1', "this is bright red\n");
+    ## Foreground colors
 
-  Term::ExtendedColor::autoreset(0); # Turn off autoreset
-  print color 'cerise2', "This is cerize...\n";
-  print color 'bold', "... that turns into bold cerise\n\n";
+    print fg 'green15', "this is bright green foreground\n";
+    my $red_text = fg('red2', "this is in red");
 
-  print color('reset');
+    ## Background colors
 
-  Term::ExtendedColor::autoreset(1); # Make sure to turn autoreset on again
+    print bg('red5', "Default foreground text on dark red background"), "\n";
+    my $red_on_green = fg('red3', bg('green12', 'Red text on green background'));
+    print "$red_on_green\n";
 
-  # Print all attributes
-  my $colors = get_colors();
+    ## Fall-thru attributes
 
-  for my $attr(sort(keys(%{$colors}))) {
-    print color $attr, $attr, "\n" unless($colors->{$attr} =~ /^\d+$/);
-  }
+    Term::ExtendedColor::autoreset(0);
+    my $bold  = fg('bold', 'This is bold');
+    my $red   = fg('red2', 'This is red... and bold');
+    my $green = bg('green28', 'This is bold red on green background');
 
-  print color('bold', color('blue2', "> Non-color attributes:\n"));
-  for(qw(italic underline blink reverse bold)) {
-    print color $_, "$_\n";
-  }
+    # Make sure to clear all attributes when autoreset turned OFF,
+    # or else the users shell will be messed up
 
-  # Change some colors
-  my $first = set_color(0, ff0000); # Change the first ANSI color to red
+    my $clear = clear();
+    print "$bold\n";
+    print "$red\n";
+    print "$green $clear\n";
 
-  # Change the greyscale spectrum to a range from fef502 (yellow) to e70f30
-  # (red)
+    ## Non-color attributes
 
-  my $base = 'ffff00';
-  for(232..255) { # Greyscale colors
-    #  ff, ff, 00
-    my($r, $g, $b) = $base =~ /(..)(..)(..)/;
+    # Turn on autoreset again
+    Term::ExtendedColor::autoreset(1);
 
-    $r = hex($r); # 255
-    $g = hex($g); # 255
-    $b = hex($b); # 0
-
-    $r -= 1;  # 254
-    $g -= 10; # 245
-    $b += 2;  # 2
-
-    $r = sprintf("%.2x", $r);
-    $g = sprintf("%.2x", $g);
-    $b = sprintf("%.2x", $b);
-
-    $base = $r . $g . $b;
-
-    my $new = set_color($_, $base);
-    print $new
-  }
+    for(qw(italic underline blink reverse bold)) {
+      print fg($_, $_), "\n";
+    }
 
 
+    ## Remove all attributes from input data
+    my @colored;
+    push(@colored, fg('bold', fg('red2', 'Bold and red')));
+    push(@colored, fg('green13', fg('italic', 'Green, italic')));
 
+    print "$_\n" for @colored;
+    print "$_\n" for uncolor(@colored);
+
+
+    ## Change some colors.
+
+    # Change the first ANSI color to red
+    print set_color(0, 'ff0000');
+
+    # Change the grayscale spectrum in the extended colorset to a range from
+    # yellow (fef502) to red (e70f30).
+
+    my $base = 'ffff00';
+    for(232..255) {
+      #  ff, ff, 00
+      my($r, $g, $b) = $base =~ /(..)(..)(..)/;
+
+      $r = hex($r); # 255
+      $g = hex($g); # 255
+      $b = hex($b); # 0
+
+      $r -= 1;  # 254
+      $g -= 10; # 245
+      $b += 2;  # 2
+
+      $r = sprintf("%.2x", $r);
+      $g = sprintf("%.2x", $g);
+      $b = sprintf("%.2x", $b);
+
+      $base = $r . $g . $b;
+
+      my $new = set_color($_, $base);
+      print $new;
+    }
 
 =head1 DESCRIPTION
 
-color()
+fg()
+  Set foreground colors and attributes.
+
   expects a string with an attribute attached to it as its first argument,
   and optionally any number of additional strings which the operation will be
   performed upon.
@@ -290,6 +315,9 @@ color()
 
   If you pass an invalid attribute, the original data will be returned
   unmodified.
+
+bg()
+  Like fg(), but sets background colors.
 
 uncolor()
   strips the input data from escape sequences.
