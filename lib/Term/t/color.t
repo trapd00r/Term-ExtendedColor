@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 8;
+use Test::More tests => 11;
 
 BEGIN {
   use_ok('Term::ExtendedColor');
@@ -28,3 +28,12 @@ is($red_fg, "\e[38;5;196mfoo", 'FG - red - autoreset ON');
 
 my $red_bg = bg('red1', 'foo');
 is($red_bg, "\e[48;5;196mfoo", 'BG - red - autoreset ON');
+
+my $no_attr_str = fg('foo');
+is($no_attr_str, 'foo', "fg('foo') returns 'foo'");
+
+my $fg_no_arg = fg();
+is($fg_no_arg, "\e[38;0m", 'fg() sets all attributes to the default');
+
+my $bg_no_arg = bg();
+is($bg_no_arg, "\e[38;0m", 'bg() sets all attributes to the default');
