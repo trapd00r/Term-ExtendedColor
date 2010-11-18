@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+
 use strict;
 use Term::ExtendedColor;
 
@@ -9,19 +10,22 @@ close($fh);
 # Emulate say()
 $\ = "\n";
 
-# Enable autoreset
-Term::ExtendedColor::autoreset(1);
+# Disable autoreset
+#Term::ExtendedColor::autoreset(0);
 
 
 for(@data) {
   $_ =~ s/(usb)/fg('blue12', bg('bold', $1))/egi;
   $_ =~ s/(disconnect)/bg('magenta16', fg('bold', $1))/egi;
+  $_ =~ s/(high speed)/fg('green20', fg('bold', $1))/egi;
+  $_ =~ s/(full speed)/fg('green12', fg('bold', $1))/egi;
+  $_ =~ s/(low speed)/fg('green4', fg('bold', $1))/egi;
 
   # Disks detected
   if($_ =~ /(^sd.*)\[(.+)\](.+)/) {
-    my $pre  = fg('blue4', $1) . fg('bold', '[');
+    my $pre  = fg('grey18', $1) . fg('bold', '[');
     my $disk = fg('yellow17', $2) . fg('bold', ']');
-    my $post = fg('blue1', $3);
+    my $post = fg('grey18', $3);
     print "$pre$disk$post";
   }
   # Out of memory
@@ -43,19 +47,18 @@ for(@data) {
   }
   # segfault     app    PID
   elsif($_ =~ /^(.+)\[(\d+)\]: (segfault) (.+)/) {
-    my $app  = fg('bold', $1);
-    my $pid  = fg('bold', fg('reverse', fg('blue9', $2)));
+    my $app  = fg('bold', fg('cyan24', $1));
+    my $pid  = fg('bold', fg('reverse', fg('red4', $2)));
     my $seg  = fg('bold', $3);
-    my $post = fg('blue9', $4);
+    my $post = fg('red2', $4);
 
     print "$pid: $app - $seg $post";
   }
 
   elsif($_ =~ /(.+) (Direct-Access)\s+(.+)/) {
-    my $pre   = fg('blue9', $1);
-    my $acc   = fg('blue9', $2);
-    my $model = fg('magenta25', fg('bold', $3));;
-
+    my $pre   = fg('grey18', $1);
+    my $acc   = fg('grey10', fg('bold', $2));
+    my $model = fg('purple14', fg('bold', $3));;
     print "$pre $acc $model";
   }
 
@@ -79,7 +82,7 @@ for(@data) {
   }
 
   else {
-    print fg('green3', $_);
+    print fg('magenta1', $_);
   }
 }
 
