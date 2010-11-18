@@ -1,6 +1,6 @@
 package Term::ExtendedColor;
 
-$VERSION = '0.10';
+$VERSION  = '0.12';
 
 
 require Exporter;
@@ -365,7 +365,7 @@ sub autoreset {
 
 =head1 NAME
 
-  Term::ExtendedColor - Color screen output using extended escape sequences
+Term::ExtendedColor - Color screen output using extended escape sequences
 
 =head1 SYNOPSIS
 
@@ -453,7 +453,7 @@ sub autoreset {
     for(0..255) {
       my $color_str = lookup($_);
       if(defined($color_str)) {
-        printf("%40s => %s\n", fg($color_str, $color_str), $_);
+        printf("%25s => %s\n", fg($color_str, $color_str), $_);
       }
     }
 
