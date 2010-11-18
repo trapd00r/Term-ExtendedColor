@@ -5,7 +5,7 @@ $VERSION = '0.10';
 
 require Exporter;
 @ISA = 'Exporter';
-our @EXPORT = qw(uncolor get_colors set_color fg bg clear);
+our @EXPORT = qw(uncolor get_colors set_color fg bg clear lookup);
 
 # We need to access the autoreset function by using the fully qualified name.
 # If we try to import functions from @EXPORT_OK, the exported functions in
@@ -27,52 +27,13 @@ my($start, $end);
 # There a no way to give these meaningful names.
 # The X11 rgb names doesn't match, neither does
 # any SVG or HTML colorset.
-# Will probably add the colors hex values as another field.
-# Will probably remap all of these colors, creating some kind of pattern.
-
-
-#
-#  blue1   => '5;39',
-#  blue2   => '5;38',
-#  blue3   => '5;33',
-#  blue4   => '5;32',
-#  blue5   => '5;31',
-#  blue6   => '5;27',
-#  blue7   => '5;26',
-#  blue8   => '5;25',
-#  blue9   => '5;21',
-#  blue10  => '5;20',
-#  blue11  => '5;19',
-#  blue12  => '5;18',
-#  blue13  => '5;17',
-#
-#  yellow1 => '5;184',
-#  yellow2 => '5;220',
-#  yellow3 => '5;190',
-#  yellow4 => '5;226',
-#  yellow5 => '5;227',
-#
-#  orange1 => '5;214',
-#  orange2 => '5;178',
-#  orange3 => '5;172',
-#  orange4 => '5;208',
-#  orange5 => '5;202',
-#  orange6 => '5;166',
-#  orange7 => '5;130',
-#
-#  cerise1 => '5;197',
-#  cerise2 => '5;161',
-#  cerise3 => '5;125',
-
-
-
-
+# They are mapped from light to dark.
 
 my %color_names = (
 
-  reset     => 0,     clear     => 0,     bold      => 1,
-  italic    => 3,     underline => 4,     blink     => 5,
-  reverse   => 7,
+  reset     => 0,     clear     => 0,     bold       => 1,
+  italic    => 3,     underline => 4,     underscore => 4,
+  blink     => 5,     reverse   => 7,
 
   # Brightest to darkest color
 
@@ -264,8 +225,6 @@ my %color_names = (
   orange3   => '5;202',
   orange4   => '5;166',
   orange5   => '5;130',
-
-
 );
 
 
@@ -291,6 +250,37 @@ sub bg {
 
   $BG = ($BG) ? 0 : 1;
   color(@_);
+}
+
+# lookup(232) - gray24
+# lookup('\e[38;5;191m') - yellow7
+
+sub lookup {
+  # Trying to lookup stuff like '\e[38;5;100mfoobar\e[0m' will NOT work
+  # and will return undef
+  my $color = shift;
+
+  # Handle \e[38;5;100m type args
+  $color =~ s/^\e\[(?:3|4)8;//;
+  $color =~ s/m$//;
+
+  # We are padding numbers < 100 with zeroes.
+  # Handle this here.
+  $color =~ s/^5?;?0+(\d+)$/$1/;
+
+  # Make sure this is really a number before padding
+  if(($color =~ /^\d+$/) and ($color < 100)) {
+    $color = sprintf("%03d", $color);
+  }
+
+  # Add the '5;' part again, so we can look it up in the table
+  if($color =~ /^\d+$/) {
+    $color = "5;$color";
+  }
+
+  my %lookup = reverse(%color_names);
+
+  return((exists($lookup{$color})) ? $lookup{$color} : undef);
 }
 
 
@@ -378,7 +368,7 @@ sub autoreset {
 
 =head1 SYNOPSIS
 
-    # fg(), bg(), set_color(), uncolor(), get_colors() imported
+    # fg(), bg(), set_color(), uncolor(), get_colors(), lookup imported
     use Term::ExtendedColor;
 
     ## Foreground colors
@@ -457,6 +447,16 @@ sub autoreset {
       print $new;
     }
 
+    ## Look up all mapped colors and print them in color
+
+    for(0..255) {
+      my $color_str = lookup($_);
+      if(defined($color_str)) {
+        printf("%40s => %s\n", fg($color_str, $color_str), $_);
+      }
+    }
+
+
 =head1 DESCRIPTION
 
 fg()
@@ -483,6 +483,15 @@ uncolor()
 
 set_color()
   change color index n value to color hex.
+
+lookup()
+  look up argument in a reverse table. Argument can be either a full escape sequence
+  or a number. Returns undef if no such attribute exists.
+
+      my $str   = lookup(255); # gray1
+
+      my $red   = fg('red2');
+      my $str   = lookup($str);
 
 get_colors()
   returns a hash reference with all available attributes.
