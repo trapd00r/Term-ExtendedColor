@@ -287,12 +287,13 @@ sub lookup {
 sub color {
   my $color_str = shift;
   my @data = @_;
-  return @data if(!defined($color_str));
+  #return @data if(!defined($color_str));
 
   $color_str =~ s/grey/gray/; # Alternative spelling
 
+  # If we got any data at all, return it
   if(!exists($color_names{$color_str})) {
-    return($color_str);
+    return((@data) ? (join('', @data)) : $color_str);
   }
 
   ($start) = ($FG)        ? "\e[38;" : "\e[48;";
