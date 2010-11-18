@@ -2,6 +2,7 @@ package Term::ExtendedColor;
 
 $VERSION = '0.10';
 
+
 require Exporter;
 @ISA = 'Exporter';
 our @EXPORT = qw(uncolor get_colors set_color fg bg clear);
@@ -12,6 +13,7 @@ our @EXPORT = qw(uncolor get_colors set_color fg bg clear);
 # This is 'intended behaviour', according to #perl.
 our @EXPORT_OK = qw(autoreset);
 
+use strict;
 #use Data::Dumper::Concise;
 use Carp;
 
@@ -273,7 +275,8 @@ our $BG;
 sub fg {
   # Call to fg() with zero args resets to defaults
   if(!@_) {
-    return("\e[38;0m");
+    # \e[38;0m
+    return("\e[0m");
   }
   $FG = ($FG) ? 0 : 1;
   color(@_);
@@ -281,7 +284,9 @@ sub fg {
 
 sub bg {
   if(!@_) {
-    return("\e[38;0m");
+    # \e[48;0m
+    # Will not work in xterm
+    return("\e[0m");
   }
 
   $BG = ($BG) ? 0 : 1;
@@ -301,7 +306,7 @@ sub color {
   }
 
   ($start) = ($FG)        ? "\e[38;" : "\e[48;";
-  ($end)   = ($AUTORESET) ? "\e[38;0m"  : '';
+  ($end)   = ($AUTORESET) ? "\e[0m"  : '';
 
   if(!(@data)) {
     # Works just like the color() function in Term::ANSIColor
@@ -362,7 +367,7 @@ sub clear {
 
 sub autoreset {
   $AUTORESET = shift;
-  ($end) = ($AUTORESET) ? "\e[38;0m" : '';
+  ($end) = ($AUTORESET) ? "\e[0m" : '';
 }
 
 =pod
