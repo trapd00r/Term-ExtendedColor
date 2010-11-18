@@ -1,0 +1,10 @@
+MANIFEST
+Makefile.PL
+README
+lib/Term/ExtendedColor.pm
+t/color.t
+t/get_colors.t
+t/pod.t
+t/set_color.t
+t/uncolor.t
+
