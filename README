@@ -1,89 +1,90 @@
-NAME
-      Term::ExtendedColor - Color screen output using extended escape sequences
+                 Term::ExtendedColor version 0.12
 
-SYNOPSIS
-      use Term::ExtendedColor; # color(), uncolor(), get_colors() imported
+  Copyright 2010 Magnus Woldrich <magnus@trapd00r.se>. This program is free
+  software; you may redistribute it and/or modify it under the same terms as
+  Perl itself.
 
-      print color 'green10', "this is dark green\n";
-      print color('red1', "this is bright red\n");
+  I welcome bug reports and patches for this package at magnus@trapd00r.se.
 
-      Term::ExtendedColor::autoreset(0); # Turn off autoreset
-      print color 'cerise2', "This is cerize...\n";
-      print color 'bold', "... that turns into bold cerise\n\n";
+BLURB
 
-      print color('reset');
-
-      Term::ExtendedColor::autoreset(1); # Make sure to turn autoreset on again
-
-      # Print all attributes
-      my $colors = get_colors();
-
-      for my $attr(sort(keys(%{$colors}))) {
-        print color $attr, $attr, "\n" unless($colors->{$attr} =~ /^\d+$/);
-      }
-
-      print color('bold', color('blue2', "> Non-color attributes:\n"));
-      for(qw(italic underline blink reverse bold)) {
-        print color $_, "$_\n";
-      }
-
-      # Change some colors
-      my $first = set_color(0, ff0000); # Change the first ANSI color to red
-
-      # Change the greyscale spectrum to a range from fef502 (yellow) to e70f30
-      # (red)
-
-      my $base = 'ffff00';
-      for(232..255) { # Greyscale colors
-        #  ff, ff, 00
-        my($r, $g, $b) = $base =~ /(..)(..)(..)/;
-
-        $r = hex($r); # 255
-        $g = hex($g); # 255
-        $b = hex($b); # 0
-
-        $r -= 1;  # 254
-        $g -= 10; # 245
-        $b += 2;  # 2
-
-        $r = sprintf("%.2x", $r);
-        $g = sprintf("%.2x", $g);
-        $b = sprintf("%.2x", $b);
-
-        $base = $r . $g . $b;
-
-        my $new = set_color($_, $base);
-        print $new
-      }
+  Term::ExtendedColor provides functions for sending so called extended escape
+  sequences, most notably colors. It can be used to set the current text
+  attributes or to apply a set of attributes to a string and reset the current
+  text attributes at the end of the string.
 
 DESCRIPTION
-    color() expects a string with an attribute attached to it as its first
-    argument, and optionally any number of additional strings which the
-    operation will be performed upon. If the internal $AUTORESET variabe is
-    non-zero (default), the list of strings will be mapped with the
-    attribute in front and the 'reset' attribute in the end. This is for
-    convience, but the behaviour can be changed by calling
-    Term::ExtendedColor::autoreset(0). Note that you will have to reset
-    manually though, or else the set attributes will last after your script
-    is finished, resulting in the prompt looking funny.
 
-      If you pass an invalid attribute, the original data will be returned
-      unmodified.
+  This module does (almost) the same thing as the core Term::ANSIColor module,
+  plus a little more. First off, as the name suggests, it handles the extended
+  colorset - that means, the ANSI colors plus 240 extra colors, building up a
+  matrix of a total of 256 colors.
 
-    uncolor() strips the input data from escape sequences.
+  Exported are functions for setting the foreground as well as background
+  colors. Other attributes are supported as well - bold, italic, underline and
+  reverse.
 
-    set_color() change color index n value to color hex.
+  There are support for doing the reverse thing - uncolor data; strip it from
+  escape sequences.
 
-    get_colors() returns a hash reference with all available attributes.
+  Support is included for redefining colors - use with care, though.
 
-SEE ALSO
-      Term::ANSIColor
+  See the POD documentation for complete details, features and usage.
 
-AUTHOR
-    Written by Magnus Woldrich
+REQUIREMENTS
 
-COPYRIGHT
-    Copyright 2010 Magnus Woldrich <magnus@trapd00r.se>. This program is
-    free software; you may redistribute it and/or modify it under the same
-    terms as Perl itself.
+  Term::ExtendedColor is written in pure Perl and has no module dependencies
+  that aren't found in Perl core.
 
+  The test suite requires the Test::More module. To check the POD documentation,
+  Test::Pod is also required.
+
+INSTALLATION
+
+  To install this module, run the following commands:
+
+  	perl Makefile.PL
+  	make
+  	make test
+  	make install
+
+HOMEPAGE AND SORCE REPOSITORY
+
+  The Term::ExtendedColor web page at:
+
+    http://github.com/trapd00r/Term-ExtendedColor
+
+  will always have the current version of this package, the current
+  documentation, and pointers to any additional resources.
+
+SUPPORT AND DOCUMENTATION
+
+  After installing, you can find documentation for this module with the
+  perldoc command.
+
+      perldoc Term::ExtendedColor
+
+  You can also look for information at:
+
+      RT, CPAN's request tracker
+          http://rt.cpan.org/NoAuth/Bugs.html?Dist=Term-ExtendedColor
+
+      AnnoCPAN, Annotated CPAN documentation
+          http://annocpan.org/dist/Term-ExtendedColor
+
+      CPAN Ratings
+          http://cpanratings.perl.org/d/Term-ExtendedColor
+
+      Search CPAN
+          http://search.cpan.org/dist/Term-ExtendedColor/
+
+
+LICENSE AND COPYRIGHT
+
+  Copyright (C) 2010 Magnus Woldrich
+
+  This program is free software; you can redistribute it and/or modify it
+  under the terms of either: the GNU General Public License as published
+  by the Free Software Foundation; or the Artistic License.
+
+  See http://dev.perl.org/licenses/ for more information.
