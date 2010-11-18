@@ -351,7 +351,7 @@ sub get_colors {
 
 sub clear {
   if(!@_) {
-    return("$fg$color_names{clear}m");
+    return("\e[0m");
   }
 }
 
