@@ -260,6 +260,9 @@ sub lookup {
   # and will return undef
   my $color = shift;
 
+  if(ref($color) eq 'ARRAY') {
+  }
+
   # Handle \e[38;5;100m type args
   $color =~ s/^\e\[(?:3|4)8;//;
   $color =~ s/m$//;
@@ -287,7 +290,11 @@ sub lookup {
 sub color {
   my $color_str = shift;
   my @data = @_;
-  #return @data if(!defined($color_str));
+
+  if(ref($data[0]) eq 'ARRAY') {
+    push(@data, @{$data[0]});
+    shift(@data);
+  }
 
   $color_str =~ s/grey/gray/; # Alternative spelling
 
@@ -312,8 +319,16 @@ sub color {
 }
 
 sub uncolor {
-  my @data = @_;
-  return undef if(!@data);
+  return undef if(!@_);
+  my @data = ();
+
+  if(ref($_[0]) eq 'ARRAY') {
+    push(@data, @{$_[0]});
+    shift(@_); # shift off the arrayref
+  }
+  else {
+    push(@data, $_);
+  }
 
   for(@data) {
     s/(?:\e|\033)\[[0-9]+(?:;[0-9]+)?(;[0-9]+)m//g;
