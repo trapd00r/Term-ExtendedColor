@@ -1,10 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 11;
-
-BEGIN {
-  use_ok('Term::ExtendedColor');
-}
-
+use Test::More tests => 10;
 use Term::ExtendedColor;
 
 my $green_fg = fg('green1', 'foo');
