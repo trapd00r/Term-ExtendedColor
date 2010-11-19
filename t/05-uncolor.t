@@ -32,6 +32,7 @@ for(my $i = 0; $i<9; ++$i) {
 @colors     = uncolor(@colors);
 @attributes = uncolor(@attributes);
 
+
 if('\e[' ~~ @colors or '\033[' ~~ @colors) {
   fail('uncolor(): Escape sequences present in colors array');
 }
