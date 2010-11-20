@@ -547,6 +547,8 @@ Term::ExtendedColor - Color screen output using extended escape sequences
   though, or else the set attributes will last after your script is finished,
   resulting in the prompt looking funny.
 
+  Optionally, you can pass a reference to an array as the second argument.
+
   If you pass an invalid attribute, the original data will be returned
   unmodified.
 
@@ -566,7 +568,7 @@ Term::ExtendedColor - Color screen output using extended escape sequences
 
   look up argument in a reverse table. Argument can be either a full escape
   sequence or a number. Alternatively, you can pass a reference to an array as
-  the first argument, and you'll get an arrayref back.
+  the first argument.
 
   Returns undef if no such attribute exists.
 
