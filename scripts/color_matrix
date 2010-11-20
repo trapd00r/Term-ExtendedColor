@@ -1,0 +1,66 @@
+#!/usr/bin/perl
+use strict;
+use Term::ExtendedColor;
+
+print "Purple:\n";
+for(my $i = 1; $i < 30; ++$i) {
+  print bg("purple$i", sprintf("% 3d", $i)), end($i);
+}
+
+print "\nGrey:\n";
+for(my $i = 1; $i < 24; ++$i) {
+  print bg("grey$i", sprintf("% 3d", $i)), end($i);
+}
+
+print "\nCyan:\n";
+for(my $i = 1; $i < 24; ++$i) {
+  print bg("cyan$i", sprintf("% 3d", $i)), end($i);
+}
+
+print "\nMagenta:\n";
+for(my $i = 1; $i < 26; ++$i) {
+  print bg("magenta$i", sprintf("% 3d", $i)), end($i);
+}
+
+print "\nYellow:\n";
+for(my $i = 1; $i < 18; ++$i) {
+  print bg("yellow$i", sprintf("% 3d", $i)), end($i);
+}
+
+print "\nBlue:\n";
+for(my $i = 1; $i < 17; ++$i) {
+  print bg("blue$i", sprintf("% 3d", $i)), end($i);
+}
+
+print "\nGreen:\n";
+for(my $i = 1; $i < 28; ++$i) {
+  print bg("green$i", sprintf("% 3d",  $i)), end($i);
+}
+
+print "\nOrange:\n";
+for(my $i = 1; $i < 5; ++$i) {
+  print bg("orange$i", sprintf("% 3d", $i)), end($i);
+}
+
+print "\nRed:\n";
+for(my $i = 1; $i < 5; ++$i) {
+  print bg("red$i", sprintf("% 3d", $i)), end($i);
+}
+
+print "\n";
+
+
+
+
+
+
+
+sub end {
+  my $i = shift;
+  if($i % 30 == 0) {
+    return("\n");
+  }
+  else {
+    return("");
+  }
+}
