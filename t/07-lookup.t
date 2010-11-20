@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 2;
+use Test::More tests => 3;
 
 use Term::ExtendedColor;
 
@@ -9,3 +9,6 @@ is(
   'magenta25',
   'lookup(\e[38;5;197m) returns magenta25',
 );
+
+my $str = lookup([255, "\e[38;5;197m"]);
+is(scalar(lookup([255, "\e[38;5;197m"])), 2, 'accepts arrayref and returns array');
