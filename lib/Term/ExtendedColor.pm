@@ -1,6 +1,6 @@
 package Term::ExtendedColor;
 
-$VERSION  = '0.12';
+$VERSION  = '0.13';
 
 
 require Exporter;
@@ -14,8 +14,15 @@ our @EXPORT = qw(uncolor get_colors set_color fg bg clear lookup);
 our @EXPORT_OK = qw(autoreset);
 
 use strict;
-#use Data::Dumper::Concise;
 use Carp;
+
+#use Data::Dumper;
+#$Data::Dumper::Terse     = 1;
+#$Data::Dumper::Indent    = 1;
+#$Data::Dumper::Useqq     = 1;
+#$Data::Dumper::Deparse   = 1;
+#$Data::Dumper::Quotekeys = 0;
+#$Data::Dumper::Sortkeys  = 1;
 
 our $AUTORESET = 1;
 
@@ -227,7 +234,6 @@ my %color_names = (
   orange5   => '5;130',
 );
 
-
 our $FG;
 our $BG;
 
@@ -260,63 +266,89 @@ sub lookup {
   # and will return undef
   my $color = shift;
 
+  my @colors = ();
   if(ref($color) eq 'ARRAY') {
+    push(@colors, @{$color});
+  }
+  else {
+    push(@colors, $color);
   }
 
-  # Handle \e[38;5;100m type args
-  $color =~ s/^\e\[(?:3|4)8;//;
-  $color =~ s/m$//;
+  for my $esc_str(@colors) {
 
-  # We are padding numbers < 100 with zeroes.
-  # Handle this here.
-  $color =~ s/^5?;?0+(\d+)$/$1/;
+    # Handle \e[38;5;100m type args
+    $esc_str =~ s/^\e\[(?:3|4)8;//;
+    $esc_str =~ s/m$//;
 
-  # Make sure this is really a number before padding
-  if(($color =~ /^\d+$/) and ($color < 100)) {
-    $color = sprintf("%03d", $color);
-  }
+    # We are padding numbers < 100 with zeroes.
+    # Handle this here.
+    $esc_str =~ s/^5?;?0+(\d+)$/$1/;
 
-  # Add the '5;' part again, so we can look it up in the table
-  if($color =~ /^\d+$/) {
-    $color = "5;$color";
+    # Make sure this is really a number before padding
+    if(($esc_str =~ /^\d+$/) and ($esc_str < 100)) {
+      $esc_str = sprintf("%03d", $esc_str);
+    }
+
+    # Add the '5;' part again, so we can look it up in the table
+    if($esc_str =~ /^\d+$/) {
+      $esc_str = "5;$esc_str";
+    }
   }
 
   my %lookup = reverse(%color_names);
 
-  return((exists($lookup{$color})) ? $lookup{$color} : undef);
+  if(scalar(@colors) == 1) {
+    my $found_str = join('', @colors);
+    return((exists($lookup{$found_str})) ? $lookup{$found_str} : undef);
+  }
+  else {
+    my @result = map { exists($lookup{$_}) } @colors;
+    return(@result);
+  }
 }
+# return((exists($lookup{$color})) ? $lookup{$color} : undef);
 
 
 sub _color {
-  my $color_str = shift;
-  my @data = @_;
-
-  if(ref($data[0]) eq 'ARRAY') {
-    push(@data, @{$data[0]});
-    shift(@data);
-  }
+  my($color_str, $data) = @_;
 
   $color_str =~ s/grey/gray/; # Alternative spelling
 
-  # If we got any data at all, return it
   if(!exists($color_names{$color_str})) {
-    return((@data) ? (join('', @data)) : $color_str);
+    return ($data) ? $data : $color_str;
   }
 
   ($start) = ($FG)        ? "\e[38;" : "\e[48;";
   ($end)   = ($AUTORESET) ? "\e[0m"  : '';
 
-  if(!(@data)) {
-    # Works just like the color() function in Term::ANSIColor
+  if(!$data) {
+    print "NOPE\n";
     return("$start$color_names{$color_str}m");
   }
 
-  map{ $_ = "$start$color_names{$color_str}m$_$end" } @data;
+  my @output;
+  if(ref($data) eq 'ARRAY') {
+    push(@output, @{$data});
+  }
+  else {
+    push(@output, $data);
+  }
+
+  for my $line(@output) {
+    $line = "$start$color_names{$color_str}m$line$end";
+  }
 
   # Restore state
   ($FG, $BG) = (0, 0);
-  return(join('', @data)); # FIXME
+
+  if(scalar(@output) == 1) {
+    return(join('', @output));
+  }
+  else {
+    return(@output);
+  }
 }
+  #map{ $_ = "$start$color_names{$color_str}m$_$end" } @data;
 
 sub uncolor {
   return undef if(!@_);
@@ -532,13 +564,17 @@ Term::ExtendedColor - Color screen output using extended escape sequences
 
 =head2 lookup()
 
-  look up argument in a reverse table. Argument can be either a full escape sequence
-  or a number. Returns undef if no such attribute exists.
+  look up argument in a reverse table. Argument can be either a full escape
+  sequence or a number. Alternatively, you can pass a reference to an array as
+  the first argument, and you'll get an arrayref back.
+
+  Returns undef if no such attribute exists.
 
       my $str   = lookup(255); # gray1
 
       my $red   = fg('red2');
       my $str   = lookup($str);
+
 
 =head2 get_colors()
 
