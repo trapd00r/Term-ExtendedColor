@@ -1,7 +1,6 @@
 package Term::ExtendedColor;
 
-$VERSION  = '0.13';
-
+$VERSION  = '0.14';
 
 require Exporter;
 @ISA = 'Exporter';
@@ -295,6 +294,7 @@ sub lookup {
     }
   }
 
+
   my %lookup = reverse(%color_names);
 
   if(scalar(@colors) == 1) {
@@ -302,11 +302,16 @@ sub lookup {
     return((exists($lookup{$found_str})) ? $lookup{$found_str} : undef);
   }
   else {
-    my @result = map { exists($lookup{$_}) } @colors;
+    my @result;
+    #@result = map{ exists($lookup{$_}) ? $lookup{$_} : undef } @colors;
+    for(@colors) {
+      if(exists($lookup{$_})) {
+        push(@result, $lookup{$_});
+      }
+    }
     return(@result);
   }
 }
-# return((exists($lookup{$color})) ? $lookup{$color} : undef);
 
 
 sub _color {
@@ -322,7 +327,6 @@ sub _color {
   ($end)   = ($AUTORESET) ? "\e[0m"  : '';
 
   if(!$data) {
-    print "NOPE\n";
     return("$start$color_names{$color_str}m");
   }
 
@@ -512,93 +516,139 @@ Term::ExtendedColor - Color screen output using extended escape sequences
 
 =head1 DESCRIPTION
 
-  Term::ExtendedColor provides functions for sending so called extended escape
-  sequences, most notably colors. It can be used to set the current text
-  attributes or to apply a set of attributes to a string and reset the current
-  text attributes at the end of the string.
+Term::ExtendedColor provides functions for sending so called extended escape
+sequences, most notably colors. It can be used to set the current text
+attributes or to apply a set of attributes to a string and reset the current
+text attributes at the end of the string.
 
-  This module does (almost) the same thing as the core Term::ANSIColor module,
-  plus a little more. First off, as the name suggests, it handles the extended
-  colorset - that means, the ANSI colors plus 240 extra colors, building up a
-  matrix of a total of 256 colors.
+This module does (almost) the same thing as the core Term::ANSIColor module,
+plus a little more. First off, as the name suggests, it handles the extended
+colorset - that means, the ANSI colors plus 240 extra colors, building up a
+matrix of a total of 256 colors.
 
-  Exported are functions for setting the foreground as well as background
-  colors. Other attributes are supported as well - bold, italic, underline and
-  reverse.
+Exported are functions for setting the foreground as well as background
+colors. Other attributes are supported as well - bold, italic, underline and
+reverse.
 
-  There are support for doing the reverse thing - uncolor data; strip it from
-  escape sequences.
+There are support for doing the reverse thing - uncolor data; strip it from
+escape sequences.
 
-  Support is included for redefining colors - use with care, though.
+Support is included for redefining colors - use with care, though.
 
 =head1 EXPORTS
 
 =head2 fg()
 
-  Set foreground colors and attributes.
+Parameters: $string | \@strings
 
-  expects a string with an attribute attached to it as its first argument,
-  and optionally any number of additional strings which the operation will be
-  performed upon.
-  If the internal $AUTORESET variabe is non-zero (default), the list of strings
-  will be mapped with the attribute in front and the 'reset' attribute in the
-  end. This is for convience, but the behaviour can be changed by calling
-  Term::ExtendedColor::autoreset(0). Note that you will have to reset manually
-  though, or else the set attributes will last after your script is finished,
-  resulting in the prompt looking funny.
+Returns:    $string | \@strings
 
-  Optionally, you can pass a reference to an array as the second argument.
+  my $green = fg('green2', 'green foreground');
+  my @blue  = fg('blue4',  ['takes arrayrefs as well']);
 
-  If you pass an invalid attribute, the original data will be returned
-  unmodified.
+Set foreground colors and attributes.
+
+Called without arguments is the same as calling C<clear()>.
+
+expects a string with an attribute attached to it as its first argument,
+and optionally any number of additional strings which the operation will be
+performed upon.
+If the internal $AUTORESET variabe is non-zero (default), the list of strings
+will be mapped with the attribute in front and the 'reset' attribute in the
+end. This is for convience, but the behaviour can be changed by calling
+Term::ExtendedColor::autoreset(0). Note that you will have to reset manually
+though, or else the set attributes will last after your script is finished,
+resulting in the prompt looking funny.
+
+Optionally, you can pass a reference to an array as the second argument.
+
+If you pass an invalid attribute, the original data will be returned
+unmodified.
 
 =head2 bg()
 
-  Like fg(), but sets background colors.
+Parameters: $string | \@strings
+
+Returns:    $string | \@strings
+
+  my $green_bg = bg('green4', 'green background');
+  my @blue_bg  = bg('blue6',  ['blue background']);
+
+Like fg(), but sets background colors.
 
 =head2 uncolor()
 
-  strips the input data from escape sequences.
+Parameters: $string | \@strings
+
+Returns:    $string | \@strings
+
+  my $stripped = uncolor($colored_data);
+  my @no_color = uncolor(\@colored);
+
+strips the input data from escape sequences.
 
 =head2 set_color()
 
-  change color index n value to color hex.
+Parameters: index, hex color
+
+Returns:    $string
+
+change color index n value to color hex.
 
 =head2 lookup()
 
-  look up argument in a reverse table. Argument can be either a full escape
-  sequence or a number. Alternatively, you can pass a reference to an array as
-  the first argument.
+Parameters: $string | \@strings
 
-  Returns undef if no such attribute exists.
+Returns:    $string | \@strings
 
-      my $str   = lookup(255); # gray1
+  my $str = lookup(255); # gray1
 
-      my $red   = fg('red2');
-      my $str   = lookup($str);
+  my $fg  = fg('red4');
+  $str    = lookup($str);
 
+  my $data   = [197, 220, 148..196];
+  my @result = lookup($data);
+
+look up argument in a reverse table. Argument can be either a full escape
+sequence or a number. Alternatively, you may pass a reference to an array as
+the first argument.
+
+Returns undef if no such attribute exists.
 
 =head2 get_colors()
 
-  returns a hash reference with all available attributes.
+Parameters: None
+
+Returns:    \%attributes
+
+  my $colors = get_colors();
+
+returns a hash reference with all available attributes and colors.
 
 =head2 clear()
 
-  returns the code for clearing current attributes and resets to normal
+Parameters: None
+
+Returns:    $string
+
+returns the code for clearing current attributes and resets to normal
 
 =head2 autoreset
 
-  turn autoreset on/off. Default is on. autoreset is not exported by default,
-  you have to call it using the fully qualified name
-  Term::ExtendedColor::autoreset().
+Parameters: 1/0
+Returns:    None
+
+turn autoreset on/off. Default is on. autoreset is not exported by default,
+you have to call it using the fully qualified name
+Term::ExtendedColor::autoreset().
 
 =head1 NOTES
 
-  The codes generated by this module complies to the extension of the ANSI colors
-  standard first implemented in xterm in 1999. The first 16 color indexes (0 - 15)
-  is the regular ANSI colors, while index 16 - 255 is the extension.
-  Not all terminal emulators support this extension, though I've had a hard time
-  finding one that doesn't. :)
+The codes generated by this module complies to the extension of the ANSI colors
+standard first implemented in xterm in 1999. The first 16 color indexes (0 - 15)
+is the regular ANSI colors, while index 16 - 255 is the extension.
+Not all terminal emulators support this extension, though I've had a hard time
+finding one that doesn't. :)
 
   Terminal    256 colors
   ----------------------
@@ -625,7 +675,7 @@ Term::ExtendedColor - Color screen output using extended escape sequences
 
 =head1 SEE ALSO
 
-  Term::ANSIColor
+Term::ANSIColor
 
 =head1 AUTHOR
 
