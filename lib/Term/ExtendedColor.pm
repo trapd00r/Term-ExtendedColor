@@ -317,17 +317,31 @@ sub lookup {
 sub _color {
   my($color_str, $data) = @_;
 
+  my $access_by_numeric_index = 0;
+
   $color_str =~ s/grey/gray/; # Alternative spelling
 
-  if(!exists($color_names{$color_str})) {
+  # No key found in the table, and not using a valid number. 
+  # Return data if any, else the invalid color string.
+  if( (! exists($color_names{$color_str})) and ($color_str !~ /^\d+$/) ) {
     return ($data) ? $data : $color_str;
   }
 
+  # Foreground or background?
   ($start) = ($FG)        ? "\e[38;" : "\e[48;";
   ($end)   = ($AUTORESET) ? "\e[0m"  : '';
 
+  # Allow access to not defined color values: fg(221);
+  if( ($color_str =~ /^\d+$/) and ($color_str < 256) and ($color_str > -1) ) {
+    $color_str = $start . "5;$color_str" . 'm';
+    $access_by_numeric_index = 1;
+  }
+
+  # Called with no data. The only useful operation here is to return the
+  # attribute code with no end sequence. Basicly the same thing as if $AUTORESET
+  # == 0.
   if(!$data) {
-    return("$start$color_names{$color_str}m");
+    return ($access_by_numeric_index) ? $color_str : "$start$color_names{$color_str}m"
   }
 
   my @output;
@@ -339,7 +353,12 @@ sub _color {
   }
 
   for my $line(@output) {
-    $line = "$start$color_names{$color_str}m$line$end";
+    if($access_by_numeric_index) {
+      $line = $color_str . $line . $end;
+    }
+    else {
+      $line = "$start$color_names{$color_str}m$line$end";
+    }
   }
 
   # Restore state
@@ -539,12 +558,14 @@ Support is included for redefining colors - use with care, though.
 
 =head2 fg()
 
-Parameters: $string | \@strings
+Parameters: $string, integer | \@strings, \@integers
 
 Returns:    $string | \@strings
 
   my $green = fg('green2', 'green foreground');
   my @blue  = fg('blue4',  ['takes arrayrefs as well']);
+
+  my $arbitary_color = fg(4, 'This is colored in the fifth ANSI color');
 
 Set foreground colors and attributes.
 
