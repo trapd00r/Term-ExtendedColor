@@ -8,20 +8,20 @@ our @EXPORT = qw(uncolor get_colors set_color fg bg clear lookup);
 
 # We need to access the autoreset function by using the fully qualified name.
 # If we try to import functions from @EXPORT_OK, the exported functions in
-# @EXPORT doesnt get exported at all, for some reason.
+#@EXPORT doesnt get exported at all, for some reason.
 # This is 'intended behaviour', according to #perl.
 our @EXPORT_OK = qw(autoreset);
 
 use strict;
 use Carp;
 
-#use Data::Dumper;
-#$Data::Dumper::Terse     = 1;
-#$Data::Dumper::Indent    = 1;
-#$Data::Dumper::Useqq     = 1;
-#$Data::Dumper::Deparse   = 1;
-#$Data::Dumper::Quotekeys = 0;
-#$Data::Dumper::Sortkeys  = 1;
+use Data::Dumper;
+$Data::Dumper::Terse     = 1;
+$Data::Dumper::Indent    = 1;
+$Data::Dumper::Useqq     = 1;
+$Data::Dumper::Deparse   = 1;
+$Data::Dumper::Quotekeys = 0;
+$Data::Dumper::Sortkeys  = 1;
 
 our $AUTORESET = 1;
 
@@ -242,7 +242,7 @@ sub fg {
     # \e[38;0m
     return("\e[0m");
   }
-  $FG = ($FG) ? 0 : 1;
+  $FG = 1;
   _color(@_);
 }
 
@@ -253,7 +253,7 @@ sub bg {
     return("\e[0m");
   }
 
-  $BG = ($BG) ? 0 : 1;
+  $BG = 1;
   _color(@_);
 }
 
@@ -344,6 +344,20 @@ sub _color {
     return ($access_by_numeric_index) ? $color_str : "$start$color_names{$color_str}m"
   }
 
+  {
+
+    # This is for operations like fg('bold', fg('red1'));
+    no warnings; # For you, Test::More
+    if($data =~ /;(\d+;\d+)m$/) {
+      my $esc = $1;
+      my @escapes = values %color_names;
+      if($esc ~~ @escapes) {
+        return $start . $color_names{$color_str} . 'm' . $data;
+      }
+    }
+
+  } # end no warnings
+
   my @output;
   if(ref($data) eq 'ARRAY') {
     push(@output, @{$data});
@@ -371,7 +385,6 @@ sub _color {
     return(@output);
   }
 }
-  #map{ $_ = "$start$color_names{$color_str}m$_$end" } @data;
 
 sub uncolor {
   return undef if(!@_);
