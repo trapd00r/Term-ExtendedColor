@@ -3,4 +3,5 @@ use strict;
 
 use Term::ExtendedColor;
 
-print "$_\n" for lookup(\@ARGV);
+$\ = "\n";
+print for lookup(\@ARGV);
