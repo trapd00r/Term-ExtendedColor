@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 12;
+use Test::More tests => 13;
 use Term::ExtendedColor;
 
 use Data::Dumper;
@@ -25,6 +25,9 @@ is($bold_bg, "\e[48;1mfoo\e[0m", 'BG - bold - autoreset OFF');
 
 my $reset = clear();
 is($reset, "\e[0m", 'reset to defaults');
+
+my $bold_green = fg('bold', fg('green1'));
+is($bold_green, "\e[38;1m\e[38;5;156m", 'BOLD GREEN foreground');
 
 my @colors = fg('blue4', ['foo', 'bar']);
 
