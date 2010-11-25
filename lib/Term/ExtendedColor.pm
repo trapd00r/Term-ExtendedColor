@@ -1,6 +1,6 @@
 package Term::ExtendedColor;
 
-$VERSION  = '0.14';
+$VERSION  = '0.16';
 
 require Exporter;
 @ISA = 'Exporter';
