@@ -16,6 +16,6 @@ for my $color(keys(%{$colors})) {
 
 for(sort(@sorted_colors)) {
   s/([a-z]+)0+(\d+)$/$1$2/;
-  print bg($_, '  x  '), "\t";
+  print bg($_, "  x  "), "\t";
   print fg($_, $_), "\n";
 }
