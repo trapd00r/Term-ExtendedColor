@@ -1,15 +1,11 @@
 #!/usr/bin/perl
-use Test::More tests => 3;
-
-BEGIN {
-  use_ok('Term::ExtendedColor');
-}
-
+use Test::More tests => 2;
+use Term::ExtendedColor;
 
 my(@colors, @attributes);
 
 my $j = 0;
-for(my $i = 0; $i< 255; ++$i) {
+for(my $i = 0; $i< 17; ++$i) {
   if($j % 2 == 0) {
     push(@colors, "\e[38;5;$i" . 'm' . 'This is in color' . "\e[0m");
   }
@@ -32,16 +28,42 @@ for(my $i = 0; $i<9; ++$i) {
 @colors     = uncolor(@colors);
 @attributes = uncolor(@attributes);
 
+my $colors = get_colors();
 
-if('\e[' ~~ @colors or '\033[' ~~ @colors) {
-  fail('uncolor(): Escape sequences present in colors array');
+#push(@colors, fg('red2', 'foobar'));
+
+my $fail = 0;
+for(@colors) {
+  if($_ =~ /\e[38;[\d]+/) {
+    $fail++;
+  }
 }
-else {
-  pass('uncolor(): No escape sequences left in colors array');
+for(@attributes) {
+  if($_ =~ /\e[48;[\d]+/) {
+    $fail++;
+  }
 }
-if('\e[' ~~ @attributes or '\033[' ~~ @attributes) {
-  fail('uncolor(): Escape sequences present in attributes array');
-}
-else {
-  pass('uncolor(): No escape sequences left in attributes array');
-}
+
+$fail
+  ? fail("uncolor: color esc sequences not parsed correctly ($fail)")
+  : pass("uncolor: color esc sequences parsed correctly")
+;
+
+use Data::Dumper;
+$Data::Dumper::Terse     = 1;
+$Data::Dumper::Indent    = 1;
+$Data::Dumper::Useqq     = 1;
+$Data::Dumper::Deparse   = 1;
+$Data::Dumper::Quotekeys = 0;
+$Data::Dumper::Sortkeys  = 1;
+
+my $non_color = Dumper uncolor(
+  "\e[2cNot \e[38;5;100;1mlegal\e[0m color esc sequences\e [0m"
+);
+
+$non_color =~ s/^"(.+)"\n$/$1/;
+is($non_color,
+  '\e[2cNot legal color esc sequences\e [0m',
+  'uncolor does not remove non-color stuff'
+);
+
