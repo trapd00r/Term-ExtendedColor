@@ -1,6 +1,6 @@
 package Term::ExtendedColor;
 
-$VERSION  = '0.162';
+$VERSION  = '0.163';
 
 require Exporter;
 @ISA = 'Exporter';
@@ -303,7 +303,6 @@ sub lookup {
   }
   else {
     my @result;
-    #@result = map{ exists($lookup{$_}) ? $lookup{$_} : undef } @colors;
     for(@colors) {
       if(exists($lookup{$_})) {
         push(@result, $lookup{$_});
@@ -379,34 +378,26 @@ sub _color {
   # Restore state
   ($FG, $BG) = (0, 0);
 
-  if(scalar(@output) == 1) {
-    return(join('', @output));
-  }
-  else {
-    return(@output);
-  }
+  return (wantarray()) ? (@output) : (join('', @output));
 }
 
 sub uncolor {
-  return undef if(!@_);
-  my @data = ();
+  my @data = @_;
+  return undef if(!@data);
 
-  if(ref($_[0]) eq 'ARRAY') {
+  if(ref($data[0]) eq 'ARRAY') {
     push(@data, @{$_[0]});
-    shift(@_); # shift off the arrayref
-  }
-  else {
-    push(@data, $_);
   }
 
   for(@data) {
     # Test::More enables warnings..
     if(defined($_)) {
-      s/(?:\e|\033)\[[0-9]+(?:;[0-9]+)?(;[0-9]+)m//g;
-      s/(?:\e|\033)\[[0-9]+m//g;
+      $_ =~ s/\e\[[\d;]*m//g;
+      #s/\e\[(?:3|4)8;(?:;[0-9]+)?(;[0-9]+)m//g;
+      #s/(?:\e|\033)\[[01234567]m//g;
     }
   }
-  return(@data);
+  return (wantarray()) ? @data : join('', @data);
 }
 
 sub set_color {
@@ -458,7 +449,6 @@ Term::ExtendedColor - Color screen output using extended escape sequences
 
 =head1 SYNOPSIS
 
-    # fg(), bg(), set_color(), uncolor(), get_colors(), lookup imported
     use Term::ExtendedColor;
 
     ## Foreground colors
@@ -472,7 +462,7 @@ Term::ExtendedColor - Color screen output using extended escape sequences
     my $red_on_green = fg('red3', bg('green12', 'Red text on green background'));
     print "$red_on_green\n";
 
-    ## Fall-thru attributes
+    ## Fall-through attributes
 
     Term::ExtendedColor::autoreset(0);
     my $bold  = fg('bold', 'This is bold');
