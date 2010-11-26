@@ -10,4 +10,3 @@ t/04-color.t
 t/05-uncolor.t
 t/06-set_color.t
 t/07-lookup.t
-
