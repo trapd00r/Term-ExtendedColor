@@ -1,6 +1,6 @@
 package Term::ExtendedColor;
 
-$VERSION  = '0.16';
+$VERSION  = '0.162';
 
 require Exporter;
 @ISA = 'Exporter';
@@ -15,13 +15,13 @@ our @EXPORT_OK = qw(autoreset);
 use strict;
 use Carp;
 
-use Data::Dumper;
-$Data::Dumper::Terse     = 1;
-$Data::Dumper::Indent    = 1;
-$Data::Dumper::Useqq     = 1;
-$Data::Dumper::Deparse   = 1;
-$Data::Dumper::Quotekeys = 0;
-$Data::Dumper::Sortkeys  = 1;
+#use Data::Dumper;
+#$Data::Dumper::Terse     = 1;
+#$Data::Dumper::Indent    = 1;
+#$Data::Dumper::Useqq     = 1;
+#$Data::Dumper::Deparse   = 1;
+#$Data::Dumper::Quotekeys = 0;
+#$Data::Dumper::Sortkeys  = 1;
 
 our $AUTORESET = 1;
 
@@ -345,14 +345,15 @@ sub _color {
   }
 
   {
-
     # This is for operations like fg('bold', fg('red1'));
     no warnings; # For you, Test::More
     if($data =~ /;(\d+;\d+)m$/) {
       my $esc = $1;
       my @escapes = values %color_names;
-      if($esc ~~ @escapes) {
-        return $start . $color_names{$color_str} . 'm' . $data;
+      for(@escapes) {
+        if($esc eq $_) {
+          return $start . $color_names{$color_str} . 'm' . $data;
+        }
       }
     }
 
