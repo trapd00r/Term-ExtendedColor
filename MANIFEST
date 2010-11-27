@@ -10,3 +10,9 @@ t/04-color.t
 t/05-uncolor.t
 t/06-set_color.t
 t/07-lookup.t
+bin/colored_dmesg
+bin/color_matrix
+bin/lookup
+bin/set_single_color
+bin/show_all_colors
+bin/uncolor
