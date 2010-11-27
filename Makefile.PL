@@ -18,18 +18,18 @@ WriteMakefile(
       'Test::More' => 0,
     },
 
-    EXE_FILES           => ['scripts/uncolor',
-                            'scripts/colored_dmesg',
-                            'scripts/color_matrix',
-                            'scripts/set_single_color',
-                            'scripts/show_all_colors',
-                            'scripts/lookup',
+    EXE_FILES           => ['bin/uncolor',
+                            'bin/colored_dmesg',
+                            'bin/color_matrix',
+                            'bin/set_single_color',
+                            'bin/show_all_colors',
+                            'bin/lookup',
                           ],
 
     MAN1PODS            => {
-      'scripts/uncolor'          => 'blib/man1/uncolor.1',
-      'scripts/colored_dmesg'    => 'blib/man1/colored_dmesg.1',
-      'scripts/set_single_color' => 'blib/man1/set_single_color.1',
+      'bin/uncolor'          => 'blib/man1/uncolor.1',
+      'bin/colored_dmesg'    => 'blib/man1/colored_dmesg.1',
+      'bin/set_single_color' => 'blib/man1/set_single_color.1',
     },
 
     MIN_PERL_VERSION => '5.10.0',
