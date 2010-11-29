@@ -15,7 +15,7 @@ WriteMakefile(
     PL_FILES            => {},
 
     PREREQ_PM           => {
-      'Test::More' => 0,
+      'Test::More' =>     0,
     },
 
     EXE_FILES           => ['bin/uncolor',
@@ -32,7 +32,7 @@ WriteMakefile(
       'bin/set_single_color' => 'blib/man1/set_single_color.1',
     },
 
-    MIN_PERL_VERSION => '5.10.0',
+    MIN_PERL_VERSION    => 0,
 
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Term-ExtendedColor-*' },
