@@ -4,7 +4,7 @@ $VERSION  = '0.166';
 
 require Exporter;
 @ISA = 'Exporter';
-our @EXPORT = qw(uncolor get_colors set_color fg bg clear lookup);
+our @EXPORT = qw(uncolor get_colors fg bg clear lookup);
 
 # We need to access the autoreset function by using the fully qualified name.
 # If we try to import functions from @EXPORT_OK, the exported functions in
@@ -400,29 +400,6 @@ sub uncolor {
   return (wantarray()) ? @data : join('', @data);
 }
 
-sub set_color {
-  my $index = shift; # color no 8
-  my $color = shift; # ff0000
-
-  if(!defined($index) or ($index eq '')) {
-    confess("Need index color (0..255)");
-  }
-  if(!defined($color) or ($color eq '')) {
-  confess("Need color specification in valid hex");
-  }
-
-  if(($index < 0) or ($index > 255)) {
-    confess("Invalid index: $index. Valid numbers are 0-255\n");
-  }
-  if($color !~ /^([A-Fa-f0-9]{6}$)/) {
-    confess("Invalid hex: $color\n");
-  }
-
-  my($r_hex, $g_hex, $b_hex) = $color =~ /(..)(..)(..)/g;
-  return("\e]4;$index;rgb:$r_hex/$g_hex/$b_hex\e\\");
-}
-
-
 sub get_colors {
   return(\%color_names);
 }
@@ -494,38 +471,6 @@ Term::ExtendedColor - Color screen output using extended escape sequences
 
     print "$_\n" for @colored;
     print "$_\n" for uncolor(@colored);
-
-
-    ## Change some colors.
-
-    # Change the first ANSI color to red
-    print set_color(0, 'ff0000');
-
-    # Change the grayscale spectrum in the extended colorset to a range from
-    # yellow (fef502) to red (e70f30).
-
-    my $base = 'ffff00';
-    for(232..255) {
-      #  ff, ff, 00
-      my($r, $g, $b) = $base =~ /(..)(..)(..)/;
-
-      $r = hex($r); # 255
-      $g = hex($g); # 255
-      $b = hex($b); # 0
-
-      $r -= 1;  # 254
-      $g -= 10; # 245
-      $b += 2;  # 2
-
-      $r = sprintf("%.2x", $r);
-      $g = sprintf("%.2x", $g);
-      $b = sprintf("%.2x", $b);
-
-      $base = $r . $g . $b;
-
-      my $new = set_color($_, $base);
-      print $new;
-    }
 
     ## Look up all mapped colors and print them in color
 
@@ -612,14 +557,6 @@ Returns:    $string | \@strings
 
 strips the input data from escape sequences.
 
-=head2 set_color()
-
-Parameters: index, hex color
-
-Returns:    $string
-
-change color index n value to color hex.
-
 =head2 lookup()
 
 Parameters: $string | \@strings
@@ -691,6 +628,8 @@ finding one that doesn't. :)
   terminator         yes
   vte                yes
   xterm              yes
+  iTerm2             yes
+  Terminal.app        no
 
   GNU Screen         yes
   tmux               yes
@@ -700,11 +639,14 @@ finding one that doesn't. :)
 
 =head1 SEE ALSO
 
-Term::ANSIColor
+L<Term::ExtendedColor::Xresources>, L<Term::ANSIColor>
 
 =head1 AUTHOR
 
-Written by Magnus Woldrich
+  Magnus Woldrich
+  CPAN ID: WOLDRICH
+  magnus@trapd00r.se
+  http://japh.se
 
 =head1 COPYRIGHT
 
