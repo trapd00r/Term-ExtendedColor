@@ -8,7 +8,6 @@ t/02-pod-coverage.t
 t/03-get_colors.t
 t/04-color.t
 t/05-uncolor.t
-t/06-set_color.t
 t/07-lookup.t
 bin/colored_dmesg
 bin/color_matrix
