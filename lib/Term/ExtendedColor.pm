@@ -1,6 +1,6 @@
 package Term::ExtendedColor;
 
-$VERSION  = '0.168';
+$VERSION  = '0.169';
 
 require Exporter;
 @ISA = 'Exporter';
@@ -339,7 +339,7 @@ sub _color {
   # Called with no data. The only useful operation here is to return the
   # attribute code with no end sequence. Basicly the same thing as if $AUTORESET
   # == 0.
-  if( (not defined($data)) or (!$data and $data ne 0) ) {
+  if(!defined($data)) { # 0 is a valid argument
     return ($access_by_numeric_index) ? $color_str : "$start$color_names{$color_str}m"
   }
 

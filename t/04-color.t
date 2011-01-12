@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 13;
+use Test::More tests => 14;
 use Term::ExtendedColor;
 
 use Data::Dumper;
@@ -10,6 +10,7 @@ $Data::Dumper::Deparse   = 1;
 $Data::Dumper::Quotekeys = 0;
 $Data::Dumper::Sortkeys  = 1;
 
+is(fg(0, 0), "\e[38;5;0m0\e[0m", 'fg(0, 0) OK');
 
 my $green_fg = fg('green1', 'foo');
 is($green_fg, "\e[38;5;156mfoo\e[0m", 'FG - green1 - autoreset OFF');
