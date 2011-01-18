@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 use Test::More tests => 4;
 
-use Term::ExtendedColor;
+use Term::ExtendedColor qw(lookup);
 
 is(lookup(255), 'gray1', "lookup(255) returns grey'");
 is(

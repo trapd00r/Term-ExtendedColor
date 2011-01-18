@@ -12,6 +12,5 @@ t/07-lookup.t
 bin/colored_dmesg
 bin/color_matrix
 bin/lookup
-bin/set_single_color
 bin/show_all_colors
 bin/uncolor

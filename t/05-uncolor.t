@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 use Test::More tests => 2;
-use Term::ExtendedColor;
+use Term::ExtendedColor qw(uncolor get_colors);
 
 my(@colors, @attributes);
 

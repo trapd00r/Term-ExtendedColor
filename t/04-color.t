@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 use Test::More tests => 14;
-use Term::ExtendedColor;
+use Term::ExtendedColor qw(fg bg clear);
 
 use Data::Dumper;
 $Data::Dumper::Terse     = 1;

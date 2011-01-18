@@ -21,7 +21,6 @@ WriteMakefile(
     EXE_FILES           => ['bin/uncolor',
                             'bin/colored_dmesg',
                             'bin/color_matrix',
-                            'bin/set_single_color',
                             'bin/show_all_colors',
                             'bin/lookup',
                           ],
@@ -29,7 +28,6 @@ WriteMakefile(
     MAN1PODS            => {
       'bin/uncolor'          => 'blib/man1/uncolor.1',
       'bin/colored_dmesg'    => 'blib/man1/colored_dmesg.1',
-      'bin/set_single_color' => 'blib/man1/set_single_color.1',
     },
 
     MIN_PERL_VERSION    => 0,
