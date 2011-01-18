@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 use strict;
-use Term::ExtendedColor;
+use Term::ExtendedColor qw(fg bg get_colors);
 
 my $colors = get_colors();
 my @sorted_colors;
