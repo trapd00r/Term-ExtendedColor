@@ -1,6 +1,6 @@
 package Term::ExtendedColor;
 
-$VERSION  = '0.170';
+$VERSION  = '0.172';
 
 require Exporter;
 @ISA = 'Exporter';
@@ -24,10 +24,6 @@ use Carp;
 
 our $AUTORESET = 1;
 
-my $fg = "\e[38;";
-my $bg = "\e[48;";
-
-my($start, $end);
 
 # There a no way to give these meaningful names.
 # The X11 rgb names doesn't match, neither does
@@ -235,6 +231,11 @@ my %color_names = (
 our $FG;
 our $BG;
 
+my $fg = "\e[38;";
+my $bg = "\e[48;";
+
+my($start, $end);
+
 sub fg {
   # Call to fg() with zero args resets to defaults
   if(!@_) {
@@ -391,7 +392,8 @@ sub uncolor {
   for(@data) {
     # Test::More enables warnings..
     if(defined($_)) {
-      $_ =~ s/\e\[[\d;]*m//g;
+      $_ =~ s/\e\[[0-9;]*m//g;
+
       #s/\e\[(?:3|4)8;(?:;[0-9]+)?(;[0-9]+)m//g;
       #s/(?:\e|\033)\[[01234567]m//g;
     }
@@ -483,24 +485,15 @@ Term::ExtendedColor - Color screen output using extended escape sequences
 
 =head1 DESCRIPTION
 
-Term::ExtendedColor provides functions for sending so called extended escape
+B<Term::ExtendedColor> provides functions for sending so called extended escape
 sequences, most notably colors. It can be used to set the current text
 attributes or to apply a set of attributes to a string and reset the current
 text attributes at the end of the string.
 
-This module does (almost) the same thing as the core Term::ANSIColor module,
+This module does (almost) the same thing as the core L<Term::ANSIColor> module,
 plus a little more. First off, as the name suggests, it handles the extended
 colorset - that means, the ANSI colors plus 240 extra colors, building up a
 matrix of a total of 256 colors.
-
-Exported are functions for setting the foreground as well as background
-colors. Other attributes are supported as well - bold, italic, underline and
-reverse.
-
-There are support for doing the reverse thing - uncolor data; strip it from
-escape sequences.
-
-Support is included for redefining colors - use with care, though.
 
 =head1 EXPORTS
 
@@ -510,7 +503,7 @@ None by default.
 
 =head2 fg()
 
-Parameters: $string, integer | \@strings, \@integers
+Parameters: $color_by_name || $color_by_index | \@strings, \@integers
 
 Returns:    $string | \@strings
 
@@ -526,28 +519,27 @@ Called without arguments is the same as calling C<clear()>.
 expects a string with an attribute attached to it as its first argument,
 and optionally any number of additional strings which the operation will be
 performed upon.
-If the internal $AUTORESET variabe is non-zero (default), the list of strings
+If the internal C<$AUTORESET> variabe is non-zero (default), the list of strings
 will be mapped with the attribute in front and the 'reset' attribute in the
 end. This is for convience, but the behaviour can be changed by calling
-Term::ExtendedColor::autoreset(0). Note that you will have to reset manually
-though, or else the set attributes will last after your script is finished,
-resulting in the prompt looking funny.
+B<Term::ExtendedColor::autoreset(0)>.
 
-Optionally, you can pass a reference to an array as the second argument.
+Be warned, you'll need to reset manually, or else the set attributes will last
+after your program is finished, leaving the user with a not-so-funny prompt.
 
 If you pass an invalid attribute, the original data will be returned
 unmodified.
 
 =head2 bg()
 
-Parameters: $string | \@strings
+Parameters: $color_by_name || $color_by_index | \@strings, \@integers
 
 Returns:    $string | \@strings
 
   my $green_bg = bg('green4', 'green background');
   my @blue_bg  = bg('blue6',  ['blue background']);
 
-Like fg(), but sets background colors.
+Like C<fg()>, but sets background colors.
 
 =head2 uncolor()
 
@@ -600,12 +592,11 @@ returns the code for clearing current attributes and resets to normal
 
 =head2 autoreset
 
-Parameters: 1/0
-Returns:    None
+Parameters: Boolean
 
 turn autoreset on/off. Default is on. autoreset is not exported by default,
 you have to call it using the fully qualified name
-Term::ExtendedColor::autoreset().
+C<Term::ExtendedColor::autoreset()>.
 
 =head1 NOTES
 
@@ -640,6 +631,46 @@ finding one that doesn't. :)
 
 * Previously needed a patch. Full support was added in version 9.09.
 
+There's no way to give these extended color meaninful names.
+
+Our first thought was to map them against some standard color names, like those
+in the HTML 4.0 specification or the SVG one. They didn’t match.
+
+Then I thought of the X11 color names – they surely must match!
+Nope.
+
+Therefore, they are named by their base color (red, green, magenta) plus index;
+The first index (always 1) is the brightest shade of that particular color, 
+while the last index is the darkest.
+
+A full list of available color can be retrieved with C<get_colors()>, but here's
+a list for reference:
+
+=head2 Attributes
+
+  blink
+  bold
+  clear
+  italic
+  reset
+  reverse
+  underline
+  underscore
+
+=head2 Colors
+
+  FIRST       LAST
+
+  red1        red5
+  blue1       blue17
+  cyan1       cyan24
+  gray1       gray24
+  green1      green28
+  orange1     orange5
+  purple1     purple30
+  yellow1     yellow18
+  magenta1    magenta26
+
 =head1 SEE ALSO
 
 L<Term::ExtendedColor::Xresources>, L<Term::ANSIColor>
@@ -651,11 +682,19 @@ L<Term::ExtendedColor::Xresources>, L<Term::ANSIColor>
   magnus@trapd00r.se
   http://japh.se
 
+=head1 CONTRIBUTORS
+
+None required yet.
+
 =head1 COPYRIGHT
 
-Copyright 2010, 2011 Magnus Woldrich <magnus@trapd00r.se>. This program is free
-software; you may redistribute it and/or modify it under the same terms as
-Perl itself.
+Copyright 2010, 2011 the Term::ExtendedColors L</AUTHOR> and L</CONTRIBUTORS> as
+listed above.
+
+=head1 LICENSE
+
+This library is free software; you may redistribute it and/or modify it under
+the same terms as Perl itself.
 
 =cut
 
