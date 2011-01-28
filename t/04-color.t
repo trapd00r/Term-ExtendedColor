@@ -10,22 +10,22 @@ $Data::Dumper::Deparse   = 1;
 $Data::Dumper::Quotekeys = 0;
 $Data::Dumper::Sortkeys  = 1;
 
-is(fg(0, 0), "\e[38;5;0m0\e[0m", 'fg(0, 0) OK');
+is(fg(0, 0), "\e[38;5;0m0\e[m", 'fg(0, 0) OK');
 
 my $green_fg = fg('green1', 'foo');
-is($green_fg, "\e[38;5;156mfoo\e[0m", 'FG - green1 - autoreset OFF');
+is($green_fg, "\e[38;5;156mfoo\e[m", 'FG - green1 - autoreset OFF');
 
 my $green_bg = bg('green1', 'foo');
-is($green_bg, "\e[48;5;156mfoo\e[0m", 'BG - green1 - autoreset OFF');
+is($green_bg, "\e[48;5;156mfoo\e[m", 'BG - green1 - autoreset OFF');
 
 my $bold_fg = fg('bold', 'foo');
-is($bold_fg, "\e[38;1mfoo\e[0m", 'FG - bold - autoreset OFF');
+is($bold_fg, "\e[38;1mfoo\e[m", 'FG - bold - autoreset OFF');
 
 my $bold_bg = bg('bold', 'foo');
-is($bold_bg, "\e[48;1mfoo\e[0m", 'BG - bold - autoreset OFF');
+is($bold_bg, "\e[48;1mfoo\e[m", 'BG - bold - autoreset OFF');
 
 my $reset = clear();
-is($reset, "\e[0m", 'reset to defaults');
+is($reset, "\e[m", 'reset to defaults');
 
 my $bold_green = fg('bold', fg('green1'));
 is($bold_green, "\e[38;1m\e[38;5;156m", 'BOLD GREEN foreground');
@@ -36,7 +36,7 @@ is(2, scalar(@colors), "fg(['foo', 'bar']) returns an array");
 my $str = join("\n", @colors);
 is(
   $str,
-  "\e[38;5;039mfoo\e[0m\n\e[38;5;039mbar\e[0m",
+  "\e[38;5;039mfoo\e[m\n\e[38;5;039mbar\e[m",
   "fg('blue4', ['foo', 'bar']) successful"
 );
 
@@ -51,7 +51,7 @@ my $no_attr_str = fg('foo');
 is($no_attr_str, 'foo', "fg('foo') returns 'foo'");
 
 my $fg_no_arg = fg();
-is($fg_no_arg, "\e[0m", 'fg() sets all attributes to the default');
+is($fg_no_arg, "\e[m", 'fg() sets all attributes to the default');
 
 my $bg_no_arg = bg();
-is($bg_no_arg, "\e[0m", 'bg() sets all attributes to the default');
+is($bg_no_arg, "\e[m", 'bg() sets all attributes to the default');

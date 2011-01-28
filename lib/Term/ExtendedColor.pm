@@ -1,26 +1,31 @@
 package Term::ExtendedColor;
-
-$VERSION  = '0.172';
-
-require Exporter;
-@ISA = 'Exporter';
-our @EXPORT_OK = qw(uncolor get_colors fg bg clear lookup autoreset);
-
-# We need to access the autoreset function by using the fully qualified name.
-# If we try to import functions from @EXPORT_OK, the exported functions in
-#@EXPORT doesnt get exported at all, for some reason.
-# This is 'intended behaviour', according to #perl.
-
 use strict;
-use Carp;
 
-#use Data::Dumper;
-#$Data::Dumper::Terse     = 1;
-#$Data::Dumper::Indent    = 1;
-#$Data::Dumper::Useqq     = 1;
-#$Data::Dumper::Deparse   = 1;
-#$Data::Dumper::Quotekeys = 0;
-#$Data::Dumper::Sortkeys  = 1;
+BEGIN {
+  use Exporter;
+  use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
+
+  $VERSION = '0.180';
+  @ISA     = qw(Exporter);
+
+  @EXPORT_OK = qw(
+    uncolor
+    get_colors
+    lookup
+    autoreset
+    fg
+    bg
+    clear
+    bold
+    italic
+    underline
+    inverse
+  );
+
+  %EXPORT_TAGS = (
+    attributes => [ qw(fg bg clear bold italic underline inverse) ],
+  );
+}
 
 our $AUTORESET = 1;
 
@@ -32,9 +37,20 @@ our $AUTORESET = 1;
 
 my %color_names = (
 
-  reset     => 0,     clear     => 0,     bold       => 1,
-  italic    => 3,     underline => 4,     underscore => 4,
-  blink     => 5,     reverse   => 7,
+  reset     => 0,     clear      => 0,   normal => 0,
+  bold      => 1,     bright     => 1,
+  faint     => 2,
+  italic    => 3,     cursive    => 3,
+  underline => 4,     underscore => 4,
+
+  # Blink: slow
+  blink     => 5,
+
+  # Blink: rapid (MS DOS ANSI.SYS, not widely supported)
+  blink_ms  => 6,
+
+  reverse   => 7,     inverse    => 7,   negative => 7,
+  conceal   => 8,
 
   # Brightest to darkest color
 
@@ -240,7 +256,7 @@ sub fg {
   # Call to fg() with zero args resets to defaults
   if(!@_) {
     # \e[38;0m
-    return("\e[0m");
+    return("\e[m");
   }
   $FG = 1;
   _color(@_);
@@ -250,12 +266,20 @@ sub bg {
   if(!@_) {
     # \e[48;0m
     # Will not work in xterm
-    return("\e[0m");
+    return("\e[m");
   }
 
   $BG = 1;
   _color(@_);
 }
+
+sub bold       { _color('bold',      @_); }
+sub italic     { _color('italic',    @_); }
+sub underline  { _color('underline', @_); }
+sub inverse    { _color('inverse',   @_); }
+sub get_colors { return \%color_names; }
+sub clear      { return "\e[m"; }
+
 
 # lookup(232) - gray24
 # lookup('\e[38;5;191m') - yellow7
@@ -276,20 +300,20 @@ sub lookup {
   for my $esc_str(@colors) {
 
     # Handle \e[38;5;100m type args
-    $esc_str =~ s/^\e\[(?:3|4)8;//;
-    $esc_str =~ s/m$//;
+    $esc_str =~ s/^\e\[(?:3|4)8;//m;
+    $esc_str =~ s/m$//m;
 
     # We are padding numbers < 100 with zeroes.
     # Handle this here.
-    $esc_str =~ s/^5?;?0+(\d+)$/$1/;
+    $esc_str =~ s/^5?;?0+(\d+)$/$1/m;
 
     # Make sure this is really a number before padding
-    if(($esc_str =~ /^\d+$/) and ($esc_str < 100)) {
+    if(($esc_str =~ /^\d+$/m) and ($esc_str < 100)) {
       $esc_str = sprintf("%03d", $esc_str);
     }
 
     # Add the '5;' part again, so we can look it up in the table
-    if($esc_str =~ /^\d+$/) {
+    if($esc_str =~ /^\d+$/m) {
       $esc_str = "5;$esc_str";
     }
   }
@@ -308,7 +332,7 @@ sub lookup {
         push(@result, $lookup{$_});
       }
     }
-    return(@result);
+    return @result;
   }
 }
 
@@ -318,20 +342,20 @@ sub _color {
 
   my $access_by_numeric_index = 0;
 
-  $color_str =~ s/grey/gray/; # Alternative spelling
+  $color_str =~ s/grey/gray/m; # Alternative spelling
 
-  # No key found in the table, and not using a valid number. 
+  # No key found in the table, and not using a valid number.
   # Return data if any, else the invalid color string.
-  if( (! exists($color_names{$color_str})) and ($color_str !~ /^\d+$/) ) {
+  if( (! exists($color_names{$color_str})) and ($color_str !~ /^\d+$/m) ) {
     return ($data) ? $data : $color_str;
   }
 
   # Foreground or background?
   ($start) = ($FG)        ? "\e[38;" : "\e[48;";
-  ($end)   = ($AUTORESET) ? "\e[0m"  : '';
+  ($end)   = ($AUTORESET) ? "\e[m"  : '';
 
   # Allow access to not defined color values: fg(221);
-  if( ($color_str =~ /^\d+$/) and ($color_str < 256) and ($color_str > -1) ) {
+  if( ($color_str =~ /^\d+$/m) and ($color_str < 256) and ($color_str > -1) ) {
     $color_str = $start . "5;$color_str" . 'm';
     $access_by_numeric_index = 1;
   }
@@ -340,13 +364,16 @@ sub _color {
   # attribute code with no end sequence. Basicly the same thing as if $AUTORESET
   # == 0.
   if(!defined($data)) { # 0 is a valid argument
-    return ($access_by_numeric_index) ? $color_str : "$start$color_names{$color_str}m"
+    return ($access_by_numeric_index)
+      ? $color_str
+      : "$start$color_names{$color_str}m"
+      ;
   }
 
   {
     # This is for operations like fg('bold', fg('red1'));
     no warnings; # For you, Test::More
-    if($data =~ /;(\d+;\d+)m$/) {
+    if($data =~ /;(\d+;\d+)m$/m) {
       my $esc = $1;
       my @escapes = values %color_names;
       for(@escapes) {
@@ -383,7 +410,7 @@ sub _color {
 
 sub uncolor {
   my @data = @_;
-  return undef if(!@data);
+  return if !@data;
 
   if(ref($data[0]) eq 'ARRAY') {
     push(@data, @{$_[0]});
@@ -392,7 +419,7 @@ sub uncolor {
   for(@data) {
     # Test::More enables warnings..
     if(defined($_)) {
-      $_ =~ s/\e\[[0-9;]*m//g;
+      $_ =~ s/\e\[[0-9;]*m//gm;
 
       #s/\e\[(?:3|4)8;(?:;[0-9]+)?(;[0-9]+)m//g;
       #s/(?:\e|\033)\[[01234567]m//g;
@@ -401,23 +428,19 @@ sub uncolor {
   return (wantarray()) ? @data : join('', @data);
 }
 
-sub get_colors {
-  return(\%color_names);
-}
-
-sub clear {
-  if(!@_) {
-    return("\e[0m");
-  }
-}
-
 
 sub autoreset {
   $AUTORESET = shift;
-  ($end) = ($AUTORESET) ? "\e[0m" : '';
+  ($end) = ($AUTORESET) ? "\e[m" : '';
+
+  return;
 }
 
 
+
+1;
+
+__END__
 
 =pod
 
@@ -427,7 +450,16 @@ Term::ExtendedColor - Color screen output using extended escape sequences
 
 =head1 SYNOPSIS
 
-    use Term::ExtendedColor qw(fg bg uncolor get_colors clear lookup);
+    use Term::ExtendedColor qw(
+      fg bg uncolor get_colors clear bold italic inverse underline lookup
+    );
+
+    # Or use the 'attributes' tag to only import the functions for setting
+    # attributes.
+    # This will import the following functions:
+
+    # fg(), bg(), bold(), underline(), inverse(), italic(), clear()
+    use Term::ExtendedColor ':attributes';
 
     ## Foreground colors
 
@@ -464,6 +496,10 @@ Term::ExtendedColor - Color screen output using extended escape sequences
       print fg($_, $_), "\n";
     }
 
+    # For convenience
+
+    my $bold   = bold("Bold text!");
+    my $italic = italic("Text in italic!");
 
     ## Remove all attributes from input data
     my @colored;
@@ -598,6 +634,35 @@ turn autoreset on/off. Default is on. autoreset is not exported by default,
 you have to call it using the fully qualified name
 C<Term::ExtendedColor::autoreset()>.
 
+=head1 WRAPPERS
+
+A couple of simple wrappers are provided for convenience.
+
+=head2 bold()
+
+Parameters: @data | \@data
+
+Convenience function that might be used in place of C<fg('bold', @data)>;
+
+=head2 italic()
+
+Parameters: @data | \@data
+
+Convenience function that might be used in place of C<fg('italic', @data)>;
+
+=head2 underline()
+
+Parameters: @data | \@data
+
+Convenience function that might be used in place of C<fg('underline', @data)>;
+
+=head2 inverse()
+
+Parameters: @data | \@data
+
+Reverse video / inverse.
+Convenience function that might be used in place of C<fg('inverse', @data)>;
+
 =head1 NOTES
 
 The codes generated by this module complies to the extension of the ANSI colors
@@ -640,7 +705,7 @@ Then I thought of the X11 color names – they surely must match!
 Nope.
 
 Therefore, they are named by their base color (red, green, magenta) plus index;
-The first index (always 1) is the brightest shade of that particular color, 
+The first index (always 1) is the brightest shade of that particular color,
 while the last index is the darkest.
 
 A full list of available color can be retrieved with C<get_colors()>, but here's
@@ -648,14 +713,15 @@ a list for reference:
 
 =head2 Attributes
 
-  blink
-  bold
-  clear
-  italic
-  reset
-  reverse
-  underline
-  underscore
+  reset, clear, normal        reset all attributes
+  bold, bright                bold or bright, depending on implementation
+  faint                       decreased intensity (not widely supported)
+  italic, cursive             italic or cursive
+  underline, underscore       underline
+  blink                       slow blink
+  blink_ms                    rapid blink (only supported in MS DOS)
+  reverse, inverse, negative  reverse video
+  conceal                     conceal, or hide (not widely supported)
 
 =head2 Colors
 
@@ -697,6 +763,3 @@ This library is free software; you may redistribute it and/or modify it under
 the same terms as Perl itself.
 
 =cut
-
-
-1;
