@@ -28,7 +28,7 @@ __END__
 
 =head1 NAME
 
-show_all_colors: show all available colors from Term::ExtendedColor, in color
+show_all_colors - show all available colors from Term::ExtendedColor, in color
 
 =head1 USAGE
 
