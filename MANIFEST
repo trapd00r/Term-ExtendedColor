@@ -1,7 +1,12 @@
-MANIFEST
-Makefile.PL
-README
+bin/color_matrix
+bin/colored_dmesg
+bin/lookup
+bin/show_all_colors
+bin/uncolor
 lib/Term/ExtendedColor.pm
+Makefile.PL
+MANIFEST
+README
 t/00-load.t
 t/01-pod.t
 t/02-pod-coverage.t
@@ -9,8 +14,3 @@ t/03-get_colors.t
 t/04-color.t
 t/05-uncolor.t
 t/07-lookup.t
-bin/colored_dmesg
-bin/color_matrix
-bin/lookup
-bin/show_all_colors
-bin/uncolor
