@@ -1,14 +1,13 @@
 #!/usr/bin/perl
-use Test::More tests => 14;
-use Term::ExtendedColor qw(fg bg clear);
+use Test::More tests => 18;
+use Term::ExtendedColor ':attributes';
 
-use Data::Dumper;
-$Data::Dumper::Terse     = 1;
-$Data::Dumper::Indent    = 1;
-$Data::Dumper::Useqq     = 1;
-$Data::Dumper::Deparse   = 1;
-$Data::Dumper::Quotekeys = 0;
-$Data::Dumper::Sortkeys  = 1;
+
+is(      bold(12), "\e[38;1m12\e[m", 'bold()');
+is(    italic(12), "\e[38;3m12\e[m", 'italic()');
+is(   inverse(12), "\e[38;7m12\e[m", 'inverse()');
+is( underline(12), "\e[38;4m12\e[m", 'underline()');
+
 
 is(fg(0, 0), "\e[38;5;0m0\e[m", 'fg(0, 0) OK');
 
