@@ -5,7 +5,7 @@ BEGIN {
   use Exporter;
   use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
 
-  $VERSION = '0.180';
+  $VERSION = '0.181';
   @ISA     = qw(Exporter);
 
   @EXPORT_OK = qw(
@@ -54,40 +54,40 @@ my %color_names = (
 
   # Brightest to darkest color
 
-  red1      => '5;196',     # => 'ff0000',
-  red2      => '5;160',     # => 'd70000',
-  red3      => '5;124',     # => 'af0000',
-  red4      => '5;088',     # => '870000',
-  red5      => '5;052',     # => '5f0000',
+  red1      => '5;196',
+  red2      => '5;160',
+  red3      => '5;124',
+  red4      => '5;088',
+  red5      => '5;052',
 
-  green1    => '5;156',     # => 'afff87',
-  green2    => '5;150',     # => 'afd787',
-  green3    => '5;120',     # => '87ff87',
-  green4    => '5;114',     # => '87d787',
-  green5    => '5;084',     # => '5fff87',
-  green6    => '5;078',     # => '5fd787',
-  green7    => '5;155',     # => 'afff5f',
-  green8    => '5;149',     # => 'afd75f',
-  green9    => '5;119',     # => '87ff5f',
-  green10   => '5;113',     # => '87d75f',
-  green11   => '5;083',     # => '5fff5f',
-  green12   => '5;077',     # => '5fd75f',
-  green13   => '5;047',     # => '00ff5f',
-  green14   => '5;041',     # => '00d75f',
-  green15   => '5;118',     # => '87ff00',
-  green16   => '5;112',     # => '87d700',
-  green17   => '5;082',     # => '5fff00',
-  green18   => '5;076',     # => '5fd700',
-  green19   => '5;046',     # => '00ff00',
-  green20   => '5;040',     # => '00d700',
-  green21   => '5;034',     # => '00af00',
-  green22   => '5;028',     # => '008700',
-  green23   => '5;022',     # => '005f00',
-  green24   => '5;107',     # => '87af5f',
-  green25   => '5;071',     # => '5faf5f',
-  green26   => '5;070',     # => '5faf00',
-  green27   => '5;064',     # => '5f8700',
-  green28   => '5;065',     # => '5f875f',
+  green1    => '5;156',
+  green2    => '5;150',
+  green3    => '5;120',
+  green4    => '5;114',
+  green5    => '5;084',
+  green6    => '5;078',
+  green7    => '5;155',
+  green8    => '5;149',
+  green9    => '5;119',
+  green10   => '5;113',
+  green11   => '5;083',
+  green12   => '5;077',
+  green13   => '5;047',
+  green14   => '5;041',
+  green15   => '5;118',
+  green16   => '5;112',
+  green17   => '5;082',
+  green18   => '5;076',
+  green19   => '5;046',
+  green20   => '5;040',
+  green21   => '5;034',
+  green22   => '5;028',
+  green23   => '5;022',
+  green24   => '5;107',
+  green25   => '5;071',
+  green26   => '5;070',
+  green27   => '5;064',
+  green28   => '5;065',
 
   blue1     => '5;075',
   blue2     => '5;074',
@@ -255,7 +255,6 @@ my($start, $end);
 sub fg {
   # Call to fg() with zero args resets to defaults
   if(!@_) {
-    # \e[38;0m
     return("\e[m");
   }
   $FG = 1;
@@ -273,10 +272,10 @@ sub bg {
   _color(@_);
 }
 
-sub bold       { _color('bold',      @_); }
-sub italic     { _color('italic',    @_); }
-sub underline  { _color('underline', @_); }
-sub inverse    { _color('inverse',   @_); }
+sub bold       { $FG = 1; _color('bold',      @_); }
+sub italic     { $FG = 1; _color('italic',    @_); }
+sub underline  { $FG = 1; _color('underline', @_); }
+sub inverse    { $FG = 1; _color('inverse',   @_); }
 sub get_colors { return \%color_names; }
 sub clear      { return "\e[m"; }
 
