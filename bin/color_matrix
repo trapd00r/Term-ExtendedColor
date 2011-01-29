@@ -50,17 +50,59 @@ for(my $i = 1; $i < 5; ++$i) {
 print "\n";
 
 
-
-
-
-
-
 sub end {
   my $i = shift;
   if($i % 30 == 0) {
-    return("\n");
+    return "\n";
   }
   else {
-    return("");
+    return '';
   }
 }
+
+
+__END__
+
+=pod
+
+=head1 NAME
+
+color_matrix - a matrix of available colors from Term::ExtendedColor
+
+=head1 USAGE
+
+color_matrix
+
+=head1 DESCRIPTION
+
+A color matrix showing the available colors in the Perl module L<Term::ExtendedColor>.
+
+=head1 REPORTING BUGS
+
+Report bugs on rt.cpan.org or to magnus@trapd00r.se
+
+=head1 AUTHOR
+
+  Magnus Woldrich
+  CPAN ID: WOLDRICH
+  magnus@trapd00r.se
+  http://japh.se
+
+=head1 CONTRIBUTORS
+
+None required yet.
+
+=head1 COPYRIGHT
+
+Copyright 2011 B<THIS MODULE>s L</AUTHOR> and L</CONTRIBUTORS> as listed above.
+
+=head1 LICENSE
+
+This library is free software; you may redistribute it and/or modify it under
+the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<show_all_colors(1)>
+
+=cut

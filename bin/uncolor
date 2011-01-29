@@ -1,10 +1,9 @@
 #!/usr/bin/perl
-
-use vars qw($APP $VERSION);
-$APP     = 'uncolor';
-$VERSION = '0.102';
-
 use strict;
+my $APP = 'uncolor';
+
+our $VERSION = '0.104';
+
 use Pod::Usage;
 use Getopt::Long;
 use Term::ExtendedColor qw(uncolor);
@@ -31,6 +30,11 @@ for(@ARGV) {
   print for uncolor(@content);
 }
 
+
+
+__END__
+
+
 =pod
 
 =head1 NAME
@@ -43,31 +47,46 @@ uncolor [FILE..]
 
 =head1 DESCRIPTION
 
-uncolor takes input from files or standard input and returns it without colors
-or attributes.
+B<uncolor> takes input from files or standard input and returns in with colors
+and attributes stripped.
 
 =head1 OPTIONS
 
      -          read from standard input
-    -h, --help  show the help
-    -m, --man   show the documentation
 
-=head1 AUTHOR
-
-Written by Magnus Woldrich
+    -h, --help  show the help and exit
+    -m, --man   show the documentation and exit
 
 =head1 REPORTING BUGS
 
-Report bugs to trapd00r@trapd00r.se
+Report bugs and/or feature requests on rt.cpan.org, the repository issue tracker
+or directly to L<magnus@trapd00r.se>
+
+=head1 AUTHOR
+
+  Magnus Woldrich
+  CPAN ID: WOLDRICH
+  magnus@trapd00r.se
+  http://japh.se
+
+=head1 CONTRIBUTORS
+
+None required yet.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2010, 2011 Magnus Woldrich
+Copyright 2011 B<THIS APPLICATION>s L</AUTHOR> and L</CONTRIBUTORS> as listed
+above.
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
+=head1 LICENSE
 
-See http://dev.perl.org/licenses/ for more information.
+This program is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<Term::ExtendedColor>
 
 =cut
+
+# vim: set ts=2 et sw=2:
