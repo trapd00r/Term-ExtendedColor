@@ -5,7 +5,7 @@ BEGIN {
   use Exporter;
   use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
 
-  $VERSION = '0.183';
+  $VERSION = '0.184';
   @ISA     = qw(Exporter);
 
   @EXPORT_OK = qw(
@@ -271,6 +271,7 @@ sub bg {
   $BG = 1;
   _color(@_);
 }
+
 
 sub bold       { $FG = 1; _color('bold',      @_); }
 sub italic     { $FG = 1; _color('italic',    @_); }
@@ -707,8 +708,8 @@ Therefore, they are named by their base color (red, green, magenta) plus index;
 The first index (always 1) is the brightest shade of that particular color,
 while the last index is the darkest.
 
-A full list of available color can be retrieved with C<get_colors()>, but here's
-a list for reference:
+A full list of available color can be retrieved with C<get_colors()>.
+Here's a full list for referencce;
 
 =head2 Attributes
 
@@ -738,7 +739,7 @@ a list for reference:
 
 =head1 SEE ALSO
 
-L<Term::ExtendedColor::Xresources>, L<Term::ANSIColor>
+L<Term::ExtendedColor::Xresources>, L<Term::ExtendedColor::TTY>, L<Term::ANSIColor>
 
 =head1 AUTHOR
 
@@ -753,8 +754,8 @@ None required yet.
 
 =head1 COPYRIGHT
 
-Copyright 2010, 2011 the Term::ExtendedColors L</AUTHOR> and L</CONTRIBUTORS> as
-listed above.
+Copyright 2010, 2011 the B<Term::ExtendedColors> L</AUTHOR> and L</CONTRIBUTORS>
+as listed above.
 
 =head1 LICENSE
 
