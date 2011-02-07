@@ -1,7 +1,8 @@
 use strict;
 use Test::More;
 
-eval q{use Test::Synopsis};
-plan_skip_all => q{Test::Synopsis required for testing synopsis} if $@;
+eval "use Test::Synopsis";
+
+plan skip_all => 'Test::Synopsis required for testing synopsis' if $@;
 
 all_synopsis_ok()

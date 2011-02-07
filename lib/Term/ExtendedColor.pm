@@ -498,8 +498,8 @@ Term::ExtendedColor - Color screen output using extended escape sequences
 
     # For convenience
 
-    my $bold   = bold("Bold text!");
-    my $italic = italic("Text in italic!");
+    my $bolded = bold("Bold text!");
+    my $italic = italic("Text in italics!");
 
     ## Remove all attributes from input data
     my @colored;
