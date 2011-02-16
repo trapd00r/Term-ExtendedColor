@@ -1,43 +1,4 @@
-                 Term::ExtendedColor version 0.12
-
-  Copyright 2010 Magnus Woldrich <magnus@trapd00r.se>. This program is free
-  software; you may redistribute it and/or modify it under the same terms as
-  Perl itself.
-
-  I welcome bug reports and patches for this package at magnus@trapd00r.se.
-
-BLURB
-
-  Term::ExtendedColor provides functions for sending so called extended escape
-  sequences, most notably colors. It can be used to set the current text
-  attributes or to apply a set of attributes to a string and reset the current
-  text attributes at the end of the string.
-
-DESCRIPTION
-
-  This module does (almost) the same thing as the core Term::ANSIColor module,
-  plus a little more. First off, as the name suggests, it handles the extended
-  colorset - that means, the ANSI colors plus 240 extra colors, building up a
-  matrix of a total of 256 colors.
-
-  Exported are functions for setting the foreground as well as background
-  colors. Other attributes are supported as well - bold, italic, underline and
-  reverse.
-
-  There are support for doing the reverse thing - uncolor data; strip it from
-  escape sequences.
-
-  Support is included for redefining colors - use with care, though.
-
-  See the POD documentation for complete details, features and usage.
-
-REQUIREMENTS
-
-  Term::ExtendedColor is written in pure Perl and has no module dependencies
-  that aren't found in Perl core.
-
-  The test suite requires the Test::More module. To check the POD documentation,
-  Test::Pod is also required.
+                 Term::ExtendedColor version 0.190
 
 INSTALLATION
 

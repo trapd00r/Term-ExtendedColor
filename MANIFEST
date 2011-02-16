@@ -10,6 +10,7 @@ README
 t/00-load.t
 t/01-pod.t
 t/02-pod-coverage.t
+t/021-synopsis.t
 t/03-get_colors.t
 t/04-color.t
 t/05-uncolor.t

@@ -5,7 +5,7 @@ BEGIN {
   use Exporter;
   use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
 
-  $VERSION = '0.185';
+  $VERSION = '0.190';
   @ISA     = qw(Exporter);
 
   @EXPORT_OK = qw(
@@ -13,6 +13,7 @@ BEGIN {
     get_colors
     lookup
     autoreset
+
     fg
     bg
     clear
@@ -24,6 +25,7 @@ BEGIN {
 
   %EXPORT_TAGS = (
     attributes => [ qw(fg bg clear bold italic underline inverse) ],
+    all        => [ @EXPORT_OK ],
   );
 }
 
@@ -450,9 +452,7 @@ Term::ExtendedColor - Color screen output using extended escape sequences
 
 =head1 SYNOPSIS
 
-    use Term::ExtendedColor qw(
-      fg bg uncolor get_colors clear bold italic inverse underline lookup
-    );
+    use Term::ExtendedColor qw(:all);
 
     # Or use the 'attributes' tag to only import the functions for setting
     # attributes.
