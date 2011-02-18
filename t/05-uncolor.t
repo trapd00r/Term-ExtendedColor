@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+use strict;
+use warnings;
 use Test::More tests => 2;
 use Term::ExtendedColor qw(uncolor get_colors);
 
