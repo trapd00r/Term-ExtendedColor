@@ -1,0 +1,6 @@
+cover_db
+blib
+pm_to_blib
+MANIFEST.bak
+Makefile
+*.un~
