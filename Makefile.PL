@@ -18,7 +18,6 @@ WriteMakefile1(
   EXE_FILES        => [
     q{bin/colored_dmesg},
     q{bin/color_matrix},
-    q{bin/lookup},
     q{bin/show_all_colors},
     q{bin/uncolor},
   ],
