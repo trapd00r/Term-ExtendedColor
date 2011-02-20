@@ -18,7 +18,6 @@ t/30-fixme.t
 t/30-notabs.t
 t/40-kwalitee.t
 t/50-complexity.t
-t/50-critic.t
 t/60-pod-coverage.t
 t/60-pod-syntax.t
 t/70-code-coverage.t
