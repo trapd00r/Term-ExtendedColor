@@ -20,5 +20,4 @@ t/40-kwalitee.t
 t/50-complexity.t
 t/60-pod-coverage.t
 t/60-pod-syntax.t
-t/70-code-coverage.t
 t/80-minperl.t
