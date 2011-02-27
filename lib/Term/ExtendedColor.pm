@@ -5,7 +5,7 @@ BEGIN {
   use Exporter;
   use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
 
-  $VERSION = '0.206';
+  $VERSION = '0.222';
   @ISA     = qw(Exporter);
 
   @EXPORT_OK = qw(
@@ -240,7 +240,7 @@ my %color_names = (
   orange5   => '5;130',
 
   # Approximations of X11 color mappings
-  # https://secure.wikimedia.org/wikipedia/en/wiki/X11_colors
+  # https://secure.wikimedia.org/wikipedia/en/wiki/X11%20colors
 
   aquamarine1       => '5;086',
   aquamarine3       => '5;079',
@@ -418,13 +418,9 @@ my %color_names = (
 
 );
 
+our($fg_called, $bg_called);
 
-our $fg_called;
-our $bg_called;
-
-my $fg = "\e[38;";
-my $bg = "\e[48;";
-
+my ($fg, $bg) = ("\e[38;", "\e[48;");
 my($start, $end);
 
 sub fg {
@@ -453,7 +449,7 @@ sub italic     { $fg_called = 1; _color('italic',    @_); }
 sub underline  { $fg_called = 1; _color('underline', @_); }
 sub inverse    { $fg_called = 1; _color('inverse',   @_); }
 sub get_colors { return \%color_names; }
-sub clear      { return "\e[m"; }
+sub clear      { defined(wantarray()) ? return "\e[m" : print "\e[m"; }
 
 
 sub _color {
@@ -560,7 +556,7 @@ __END__
 
 =head1 NAME
 
-Term::ExtendedColor - Color screen output using extended escape sequences
+Term::ExtendedColor - Color screen output using 256 colors
 
 =head1 SYNOPSIS
 
@@ -624,26 +620,26 @@ Term::ExtendedColor - Color screen output using extended escape sequences
 =head1 DESCRIPTION
 
 B<Term::ExtendedColor> provides functions for sending so called extended escape
-sequences, most notably colors. It can be used to set the current text
-attributes or to apply a set of attributes to a string and reset the current
-text attributes at the end of the string.
-
-This module does (almost) the same thing as the core L<Term::ANSIColor> module,
-plus a little more. First off, as the name suggests, it handles the extended
-colorset - that means, the ANSI colors plus 240 extra colors, building up a
-matrix of a total of 256 colors.
+sequences to the terminal. This ought to be used with a 256-color compatible
+terminal; see the NOTES section for a matrix of terminal emulators currently
+supporting this.
 
 =head1 EXPORTS
 
 None by default.
 
+Two tags are provided for convience:
+
+  # Import all functions
+  use Term::ExtendedColor qw(:all);
+
+  # Import functions for setting attributes
+  # fg(), bg(), bold(), italic(), underline(), inverse(), clear()
+  use Term::ExtendedColor qw(:attributes);
+
 =head1 FUNCTIONS
 
-=head2 fg()
-
-Parameters: $color_by_name || $color_by_index | \@strings, \@integers
-
-Returns:    $string | \@strings
+=head2 fg($color, $string)
 
   my $green = fg('green2', 'green foreground');
   my @blue  = fg('blue4',  ['takes arrayrefs as well']);
@@ -654,95 +650,82 @@ Returns:    $string | \@strings
 
 Set foreground colors and attributes.
 
-Called without arguments is the same as calling C<clear()>.
+See L<COLORS AND ATTRIBUTES> for valid first arguments. Additionally, colors can
+be specified using their index value:
 
-expects a string with an attribute attached to it as its first argument,
-and optionally any number of additional strings which the operation will be
-performed upon.
-If the internal C<$AUTORESET> variabe is non-zero (default), the list of strings
-will be mapped with the attribute in front and the 'reset' attribute in the
-end. This is for convience, but the behaviour can be changed by calling
-B<Term::ExtendedColor::autoreset(0)>.
+  my $yellow = fg(220, 'Yellow');
 
-Be warned, you'll need to reset manually, or else the set attributes will last
-after your program is finished, leaving the user with a not-so-funny prompt.
+If the internal C<$AUTORESET> variable is non-zero (default), every element in
+the list of strings will be wrapped in escape sequences in such a way that the
+requested attributes will be set before the string and reset to defaults after
+the string.
 
-If you pass an invalid attribute, the original data will be returned
+Fall-through attributes can be enabled by setting C<$AUTORESET> to a false
+value.
+
+  Term::ExtendedColor::autoreset( 0 );
+  my $red   = fg('red1', 'Red');
+  my $green = fg('green1', 'Green');
+
+  print "Text after $red is red until $green\n";
+  print "Text is still green, ", bold('and now bold as well!');
+
+  # If you exit now without resetting the colors and attributes, chances are
+  # your prompt will be messed up.
+
+  clear(); # All back to normal
+
+If an invalid attribute is passed, the original data will be returned
 unmodified.
 
-=head2 bg()
-
-Parameters: $color_by_name || $color_by_index | \@strings, \@integers
-
-Returns:    $string | \@strings
+=head2 bg($color, $string)
 
   my $green_bg = bg('green4', 'green background');
   my @blue_bg  = bg('blue6',  ['blue background']);
 
 Like C<fg()>, but sets background colors.
 
-=head2 uncolor()
-
-Parameters: $string | \@strings
-
-Returns:    $string | \@strings
+=head2 uncolor($string)
 
   my $stripped = uncolor($colored_data);
   my @no_color = uncolor(\@colored);
 
-strips the input data from escape sequences.
+Remove all attribute and color escape sequences from the input.
+
+See L<uncolor> for a command-line utility using this function.
 
 =head2 get_colors()
 
-Parameters: None
-
-Returns:    \%attributes
-
   my $colors = get_colors();
 
-returns a hash reference with all available attributes and colors.
+Returns a hash reference with all available attributes and colors.
 
 =head2 clear()
 
-Parameters: None
+When called in scalar context, returns the escape sequence that resets all
+attributes to their defaults.
 
-Returns:    $string
+When called in void context, prints it directly.
 
-returns the code for clearing current attributes and resets to normal
+=head2 autoreset()
 
-=head2 autoreset
+Turn autoreset on/off. Enabled by default.
 
-Parameters: Boolean
+  Term::ExtendedColor::autoreset( 0 ); # Turn off autoreset
 
-turn autoreset on/off. Default is on. autoreset is not exported by default,
-you have to call it using the fully qualified name
-C<Term::ExtendedColor::autoreset()>.
-
-=head1 WRAPPERS
-
-A couple of simple wrappers are provided for convenience.
-
-=head2 bold()
-
-Parameters: @data | \@data
+=head2 bold(@data)
 
 Convenience function that might be used in place of C<fg('bold', @data)>;
 
-=head2 italic()
-
-Parameters: @data | \@data
+=head2 italic(@data)
 
 Convenience function that might be used in place of C<fg('italic', @data)>;
 
-=head2 underline()
-
-Parameters: @data | \@data
+=head2 underline(@data)
 
 Convenience function that might be used in place of C<fg('underline', @data)>;
 
-=head2 inverse()
-
-Parameters: @data | \@data
+=head2 inverse(@data)
 
 Reverse video / inverse.
 Convenience function that might be used in place of C<fg('inverse', @data)>;
@@ -792,8 +775,11 @@ while the last index is the darkest.
 It's also possible to use some X color names, as defined in C<rgb.txt>. Do note
 that the color values do not match exactly; it's just an approximation.
 
-A full list of available color can be retrieved with C<get_colors()>.
-Here's a full list for referencce;
+A full list of available colors can be retrieved with C<get_colors()>.
+See L<COLORS AND ATTRIBUTES> for full list. All mapped colors can also be
+retrieved programmatically with C<get_colors()>.
+
+=head1 COLORS AND ATTRIBUTES
 
 =head2 Attributes
 
