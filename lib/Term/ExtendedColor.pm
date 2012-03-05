@@ -5,14 +5,15 @@ BEGIN {
   use Exporter;
   use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
 
-  $VERSION = '0.224';
+  $VERSION = '0.226';
   @ISA     = qw(Exporter);
 
   @EXPORT_OK = qw(
     uncolor
+    uncolour
     get_colors
+    get_colours
     autoreset
-
     fg
     bg
     clear
@@ -28,8 +29,10 @@ BEGIN {
   );
 }
 
-our $AUTORESET = 1;
+*uncolour    = *Term::ExtendedColor::uncolor;
+*get_colours = *Term::ExtendedColor::get_colors;
 
+our $AUTORESET = 1;
 
 my %color_names = (
 
