@@ -769,7 +769,7 @@ finding one that doesn't. :)
 There's no way to give these extended colors meaningful names.
 
 Our first thought was to map them against some standard color names, like those
-in the HTML 4.0 specification or the SVG one. They didn’t match.
+in the HTML 4.0 specification or the SVG one. They didn't match.
 
 Therefore, they are named by their base color (red, green, magenta) plus index;
 The first index (always 1) is the brightest shade of that particular color,
