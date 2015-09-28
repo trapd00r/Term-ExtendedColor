@@ -529,7 +529,8 @@ sub uncolor {
   return if !@data;
 
   if(ref($data[0]) eq 'ARRAY') {
-    push(@data, @{$_[0]});
+    my $ref = shift @data;
+    push(@data, @{$ref});
   }
 
   for(@data) {
