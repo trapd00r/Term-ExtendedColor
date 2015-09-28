@@ -693,6 +693,7 @@ Like C<fg()>, but sets background colors.
 
   my $stripped = uncolor($colored_data);
   my @no_color = uncolor(\@colored);
+  my @no_color = uncolor(@colored);
 
 Remove all attribute and color escape sequences from the input.
 
