@@ -994,7 +994,7 @@ L<Term::ExtendedColor::Xresources>, L<Term::ExtendedColor::TTY>, L<Term::ANSICol
 
   Magnus Woldrich
   CPAN ID: WOLDRICH
-  magnus@trapd00r.se
+  m@japh.se
   http://japh.se
 
 =head1 CONTRIBUTORS
@@ -1003,7 +1003,7 @@ None required yet.
 
 =head1 COPYRIGHT
 
-Copyright 2010, 2011 the B<Term::ExtendedColor> L</AUTHOR> and L</CONTRIBUTORS>
+Copyright 2010, 2011, 2018 the B<Term::ExtendedColor> L</AUTHOR> and L</CONTRIBUTORS>
 as listed above.
 
 =head1 LICENSE
