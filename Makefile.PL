@@ -15,12 +15,7 @@ WriteMakefile1(
   ABSTRACT         => q{Color screen output using extended escape sequences},
   VERSION_FROM     => q{lib/Term/ExtendedColor.pm},
   LICENSE          => q{perl},
-  EXE_FILES        => [
-    q{bin/colored_dmesg},
-    q{bin/color_matrix},
-    q{bin/show_all_colors},
-    q{bin/uncolor},
-  ],
+  EXE_FILES        => [ glob('bin/*') ],
   PREREQ_PM        => { },
   MAN1PODS         => { },
   dist             => { COMPRESS => q{gzip -9f},    SUFFIX => q{gz}, },
