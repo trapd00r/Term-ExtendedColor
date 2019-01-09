@@ -17,6 +17,7 @@ WriteMakefile1(
   LICENSE          => q{perl},
   EXE_FILES        => [ glob('bin/*') ],
   PREREQ_PM        => { },
+  MIN_PERL_VERSION => 5.010,
   MAN1PODS         => { },
   dist             => { COMPRESS => q{gzip -9f},    SUFFIX => q{gz}, },
   clean            => { FILES    => q{Term-ExtendedColor-*},                  },
