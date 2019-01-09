@@ -5,7 +5,7 @@ BEGIN {
   use Exporter;
   use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
 
-  $VERSION = '0.226';
+  $VERSION = '0.230';
   @ISA     = qw(Exporter);
 
   @EXPORT_OK = qw(
@@ -688,7 +688,7 @@ unmodified.
 
 Like C<fg()>, but sets background colors.
 
-=head2 uncolor($string)
+=head2 uncolor($string) | uncolour($string)
 
   my $stripped = uncolor($colored_data);
   my @no_color = uncolor(\@colored);
@@ -697,7 +697,7 @@ Remove all attribute and color escape sequences from the input.
 
 See L<uncolor> for a command-line utility using this function.
 
-=head2 get_colors()
+=head2 get_colors() | get_colours()
 
   my $colors = get_colors();
 
