@@ -2,6 +2,7 @@ bin/color_matrix
 bin/colored_dmesg
 bin/show_all_colors
 bin/uncolor
+bin/colorfg
 examples/fall_through_attributes.pl
 lib/Term/ExtendedColor.pm
 Makefile.PL
