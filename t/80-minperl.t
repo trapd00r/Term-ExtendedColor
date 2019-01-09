@@ -12,4 +12,4 @@ eval 'use Test::MinimumVersion'; ## no critic
 
 plan skip_all => 'Test::MinimumVersion required' if $@;
 
-all_minimum_version_ok('5.008');
+all_minimum_version_ok('5.010');
