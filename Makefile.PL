@@ -11,7 +11,7 @@ WriteMakefile1(
   },
 
   NAME             => q{Term::ExtendedColor},
-  AUTHOR           => q{Magnus Woldrich <trapd00r@trapd00r.se>},
+  AUTHOR           => q{Magnus Woldrich <m@japh.se>},
   ABSTRACT         => q{Color screen output using extended escape sequences},
   VERSION_FROM     => q{lib/Term/ExtendedColor.pm},
   LICENSE          => q{perl},
