@@ -1,0 +1,456 @@
+# NAME
+
+Term::ExtendedColor - Color screen output using 256 colors
+
+# SYNOPSIS
+
+    use Term::ExtendedColor qw(:all);
+
+    # Or use the 'attributes' tag to only import the functions for setting
+    # attributes.
+    # This will import the following functions:
+
+    # fg(), bg(), bold(), underline(), inverse(), italic(), clear()
+    use Term::ExtendedColor ':attributes';
+
+    ## Foreground colors
+
+    my $red_text = fg('red2', 'this is in red');
+    my $spring   = fg('springgreen3', 'this is green');
+
+    ## Background colors
+
+    print bg('red5', "Default foreground text on dark red background"), "\n";
+    my $red_on_green = fg('red3', bg('green12', 'Red text on green background'));
+    print "$red_on_green\n";
+
+    ## Fall-through attributes
+
+    Term::ExtendedColor::autoreset(0);
+    my $bold  = fg('bold', 'This is bold');
+    my $red   = fg('red2', 'This is red... and bold');
+    my $green = bg('green28', 'This is bold red on green background');
+
+    # Make sure to clear all attributes when autoreset turned OFF,
+    # or else the users shell will be messed up
+
+    my $clear = clear();
+    print "$bold\n";
+    print "$red\n";
+    print "$green $clear\n";
+
+    ## Non-color attributes
+
+    # Turn on autoreset again
+    Term::ExtendedColor::autoreset(1);
+
+    for(qw(italic underline blink reverse bold)) {
+      print fg($_, $_), "\n";
+    }
+
+    # For convenience
+
+    my $bolded = bold("Bold text!");
+    my $italic = italic("Text in italics!");
+
+    ## Remove all attributes from input data
+    my @colored;
+    push(@colored, fg('bold', fg('red2', 'Bold and red')));
+    push(@colored, fg('green13', fg('italic', 'Green, italic')));
+
+    print "$_\n" for @colored;
+    print "$_\n" for uncolor(@colored);
+
+# DESCRIPTION
+
+**Term::ExtendedColor** provides functions for sending so called extended escape
+sequences to the terminal. This ought to be used with a 256-color compatible
+terminal; see the NOTES section for a matrix of terminal emulators currently
+supporting this.
+
+# EXPORTS
+
+None by default.
+
+Two tags are provided for convience:
+
+    # Import all functions
+    use Term::ExtendedColor qw(:all);
+
+    # Import functions for setting attributes
+    # fg(), bg(), bold(), italic(), underline(), inverse(), clear()
+    use Term::ExtendedColor qw(:attributes);
+
+# FUNCTIONS
+
+## fg($color, $string)
+
+    my $green = fg('green2', 'green foreground');
+    my @blue  = fg('blue4',  ['takes arrayrefs as well']);
+
+    my $x_color = fg('mediumorchid1', 'Using mappings from the X11 rgb.txt');
+
+    my $arbitary_color = fg(4, 'This is colored in the fifth ANSI color');
+
+Set foreground colors and attributes.
+
+See ["COLORS AND ATTRIBUTES"](#colors-and-attributes) for valid first arguments. Additionally, colors can
+be specified using their index value:
+
+    my $yellow = fg(220, 'Yellow');
+
+If the internal `$AUTORESET` variable is non-zero (default), every element in
+the list of strings will be wrapped in escape sequences in such a way that the
+requested attributes will be set before the string and reset to defaults after
+the string.
+
+Fall-through attributes can be enabled by setting `$AUTORESET` to a false
+value.
+
+    Term::ExtendedColor::autoreset( 0 );
+    my $red   = fg('red1', 'Red');
+    my $green = fg('green1', 'Green');
+
+    print "Text after $red is red until $green\n";
+    print "Text is still green, ", bold('and now bold as well!');
+
+    # If you exit now without resetting the colors and attributes, chances are
+    # your prompt will be messed up.
+
+    clear(); # All back to normal
+
+If an invalid attribute is passed, the original data will be returned
+unmodified.
+
+## bg($color, $string)
+
+    my $green_bg = bg('green4', 'green background');
+    my @blue_bg  = bg('blue6',  ['blue background']);
+
+Like `fg()`, but sets background colors.
+
+## uncolor($string) | uncolour($string)
+
+    my $stripped = uncolor($colored_data);
+    my @no_color = uncolor(\@colored);
+    my @no_color = uncolor(@colored);
+
+Remove all attribute and color escape sequences from the input.
+
+See [uncolor](https://metacpan.org/pod/uncolor) for a command-line utility using this function.
+
+## get\_colors() | get\_colours()
+
+    my $colors = get_colors();
+
+Returns a hash reference with all available attributes and colors.
+
+## clear()
+
+When called in scalar context, returns the escape sequence that resets all
+attributes to their defaults.
+
+When called in void context, prints it directly.
+
+## autoreset()
+
+Turn autoreset on/off. Enabled by default.
+
+    Term::ExtendedColor::autoreset( 0 ); # Turn off autoreset
+
+## bold(\\@data)
+
+Convenience function that might be used in place of `fg('bold', \@data)`;
+
+## italic(\\@data)
+
+Convenience function that might be used in place of `fg('italic', \@data)`;
+
+## underline(\\@data)
+
+Convenience function that might be used in place of `fg('underline', \@data)`;
+
+## inverse(\\@data)
+
+Reverse video / inverse.
+Convenience function that might be used in place of `fg('inverse', \@data)`;
+
+# NOTES
+
+The codes generated by this module complies to the extension of the ANSI colors
+standard first implemented in xterm in 1999. The first 16 color indexes (0 - 15)
+is the regular ANSI colors, while index 16 - 255 is the extension.
+Not all terminal emulators support this extension, though I've had a hard time
+finding one that doesn't. :)
+
+    Terminal    256 colors
+    ----------------------
+    aterm               no
+    eterm              yes
+    gnome-terminal     yes
+    konsole            yes
+    lxterminal         yes
+    mrxvt              yes
+    roxterm            yes
+    rxvt                no
+    rxvt-unicode       yes *
+    sakura             yes
+    terminal           yes
+    terminator         yes
+    vte                yes
+    xterm              yes
+    iTerm2             yes
+    Terminal.app        no
+
+    GNU Screen         yes
+    tmux               yes
+    TTY/VC              no
+
+\* Previously needed a patch. Full support was added in version 9.09.
+
+There's no way to give these extended colors meaningful names.
+
+Our first thought was to map them against some standard color names, like those
+in the HTML 4.0 specification or the SVG one. They didn't match.
+
+Therefore, they are named by their base color (red, green, magenta) plus index;
+The first index (always 1) is the brightest shade of that particular color,
+while the last index is the darkest.
+
+It's also possible to use some X color names, as defined in `rgb.txt`. Do note
+that the color values do not match exactly; it's just an approximation.
+
+A full list of available colors can be retrieved with `get_colors()`.
+See ["COLORS AND ATTRIBUTES"](#colors-and-attributes) for full list. All mapped colors can also be
+retrieved programmatically with `get_colors()`.
+
+# COLORS AND ATTRIBUTES
+
+## Attributes
+
+    reset, clear, normal        reset all attributes
+    bold, bright                bold or bright, depending on implementation
+    faint                       decreased intensity (not widely supported)
+    italic, cursive             italic or cursive
+    underline, underscore       underline
+    blink                       slow blink
+    blink_ms                    rapid blink (only supported in MS DOS)
+    reverse, inverse, negative  reverse video
+    conceal                     conceal, or hide (not widely supported)
+
+## Standard color map
+
+    FIRST       LAST
+
+    red1        red5
+    blue1       blue17
+    cyan1       cyan24
+    gray1       gray24
+    green1      green28
+    orange1     orange5
+    purple1     purple30
+    yellow1     yellow18
+    magenta1    magenta26
+
+## X color names
+
+    aquamarine1
+    aquamarine3
+    blueviolet
+    cadetblue1
+    cadetblue2
+    chartreuse1
+    chartreuse2
+    chartreuse3
+    chartreuse4
+    cornflowerblue
+    cornsilk1
+    darkblue
+    darkcyan
+    darkgoldenrod
+    darkgreen
+    darkkhaki
+    darkmagenta1
+    darkmagenta2
+    darkolivegreen1
+    darkolivegreen2
+    darkolivegreen3
+    darkolivegreen4
+    darkolivegreen5
+    darkorange3
+    darkorange4
+    darkorange1
+    darkred1
+    darkred2
+    darkseagreen1
+    darkseagreen2
+    darkseagreen3
+    darkseagreen4
+    darkslategray1
+    darkslategray2
+    darkslategray3
+    darkturquoise
+    darkviolet
+    deeppink1
+    deeppink2
+    deeppink3
+    deeppink4
+    deepskyblue1
+    deepskyblue2
+    deepskyblue3
+    deepskyblue4
+    deepskyblue4
+    dodgerblue1
+    dodgerblue2
+    dodgerblue3
+    gold1
+    gold3
+    greenyellow
+    grey0
+    grey100
+    grey11
+    grey15
+    grey19
+    grey23
+    grey27
+    grey30
+    grey3
+    grey35
+    grey37
+    grey39
+    grey42
+    grey46
+    grey50
+    grey53
+    grey54
+    grey58
+    grey62
+    grey63
+    grey66
+    grey69
+    grey70
+    grey74
+    grey7
+    grey78
+    grey82
+    grey84
+    grey85
+    grey89
+    grey93
+    honeydew2
+    hotpink2
+    hotpink3
+    hotpink
+    indianred1
+    indianred
+    khaki1
+    khaki3
+    lightcoral
+    lightcyan1
+    lightcyan3
+    lightgoldenrod1
+    lightgoldenrod2
+    lightgoldenrod3
+    lightgreen
+    lightpink1
+    lightpink3
+    lightpink4
+    lightsalmon1
+    lightsalmon3
+    lightsalmon3
+    lightseagreen
+    lightskyblue1
+    lightskyblue3
+    lightskyblue3
+    lightslateblue
+    lightslategrey
+    lightsteelblue1
+    lightsteelblue3
+    lightsteelblue
+    lightyellow3
+    mediumorchid1
+    mediumorchid3
+    mediumorchid
+    mediumpurple1
+    mediumpurple2
+    mediumpurple3
+    mediumpurple4
+    mediumpurple
+    mediumspringgreen
+    mediumturquoise
+    mediumvioletred
+    mistyrose1
+    mistyrose3
+    navajowhite1
+    navajowhite3
+    navyblue
+    orangered1
+    orchid1
+    orchid2
+    orchid
+    palegreen1
+    palegreen3
+    paleturquoise1
+    paleturquoise4
+    palevioletred1
+    pink1
+    pink3
+    plum1
+    plum2
+    plum3
+    plum4
+    purple
+    rosybrown
+    royalblue1
+    salmon1
+    sandybrown
+    seagreen1
+    seagreen2
+    seagreen3
+    skyblue1
+    skyblue2
+    skyblue3
+    slateblue1
+    slateblue3
+    springgreen1
+    springgreen2
+    springgreen3
+    springgreen4
+    steelblue1
+    steelblue3
+    steelblue
+    tan
+    thistle1
+    thistle3
+    turquoise2
+    turquoise4
+    violet
+    wheat1
+    wheat4
+
+# SEE ALSO
+
+[Term::ExtendedColor::Xresources](https://metacpan.org/pod/Term::ExtendedColor::Xresources), [Term::ExtendedColor::TTY](https://metacpan.org/pod/Term::ExtendedColor::TTY), [Term::ANSIColor](https://metacpan.org/pod/Term::ANSIColor)
+
+# AUTHOR
+
+    Magnus Woldrich
+    CPAN ID: WOLDRICH
+    m@japh.se
+    http://japh.se
+
+# CONTRIBUTORS
+
+[Varadinsky](https://github.com/Varadinsky)
+
+None required yet.
+
+# COPYRIGHT
+
+Copyright 2010, 2011, 2018, 2019- the **Term::ExtendedColor** ["AUTHOR"](#author)
+and ["CONTRIBUTORS"](#contributors) as listed above.
+
+# LICENSE
+
+This library is free software; you may redistribute it and/or modify it under
+the same terms as Perl itself.
