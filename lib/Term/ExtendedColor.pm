@@ -1007,8 +1007,6 @@ L<Term::ExtendedColor::Xresources>, L<Term::ExtendedColor::TTY>, L<Term::ANSICol
 
 L<Varadinsky|https://github.com/Varadinsky>
 
-None required yet.
-
 =head1 COPYRIGHT
 
 Copyright 2010, 2011, 2018, 2019- the B<Term::ExtendedColor> L</AUTHOR>

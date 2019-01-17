@@ -443,8 +443,6 @@ retrieved programmatically with `get_colors()`.
 
 [Varadinsky](https://github.com/Varadinsky)
 
-None required yet.
-
 # COPYRIGHT
 
 Copyright 2010, 2011, 2018, 2019- the **Term::ExtendedColor** ["AUTHOR"](#author)
