@@ -533,7 +533,8 @@ sub uncolor {
   return if !@data;
 
   if(ref($data[0]) eq 'ARRAY') {
-    push(@data, @{$_[0]});
+    my $ref = shift @data;
+    push(@data, @{$ref});
   }
 
   for(@data) {
@@ -696,6 +697,7 @@ Like C<fg()>, but sets background colors.
 
   my $stripped = uncolor($colored_data);
   my @no_color = uncolor(\@colored);
+  my @no_color = uncolor(@colored);
 
 Remove all attribute and color escape sequences from the input.
 
