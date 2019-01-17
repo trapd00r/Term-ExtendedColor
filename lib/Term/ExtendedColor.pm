@@ -722,22 +722,22 @@ Turn autoreset on/off. Enabled by default.
 
   Term::ExtendedColor::autoreset( 0 ); # Turn off autoreset
 
-=head2 bold(@data)
+=head2 bold(\@data)
 
-Convenience function that might be used in place of C<fg('bold', @data)>;
+Convenience function that might be used in place of C<fg('bold', \@data)>;
 
-=head2 italic(@data)
+=head2 italic(\@data)
 
-Convenience function that might be used in place of C<fg('italic', @data)>;
+Convenience function that might be used in place of C<fg('italic', \@data)>;
 
-=head2 underline(@data)
+=head2 underline(\@data)
 
-Convenience function that might be used in place of C<fg('underline', @data)>;
+Convenience function that might be used in place of C<fg('underline', \@data)>;
 
-=head2 inverse(@data)
+=head2 inverse(\@data)
 
 Reverse video / inverse.
-Convenience function that might be used in place of C<fg('inverse', @data)>;
+Convenience function that might be used in place of C<fg('inverse', \@data)>;
 
 =head1 NOTES
 
