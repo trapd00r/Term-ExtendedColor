@@ -1,10 +1,10 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-use Test::More tests => 2;
+use Test::More tests => 4;
 use Term::ExtendedColor qw(uncolor get_colors);
 
-my(@colors, @attributes);
+my(@colors, @colors2, @attributes);
 
 my $j = 0;
 for(my $i = 0; $i< 17; ++$i) {
@@ -27,6 +27,7 @@ for(my $i = 0; $i<9; ++$i) {
   }
 }
 
+@colors2    = @colors;
 @colors     = uncolor(@colors);
 @attributes = uncolor(@attributes);
 
@@ -69,3 +70,6 @@ is($non_color,
   'uncolor does not remove non-color stuff'
 );
 
+is_deeply( [ uncolor(\@colors2) ], \@colors,     "uncolor: passing arrayref as first argument - list context");
+
+is       ( uncolor(\@colors2), join('',@colors), "uncolor: passing arrayref as first argument - scalar context");
