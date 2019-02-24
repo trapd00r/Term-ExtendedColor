@@ -428,6 +428,19 @@ retrieved programmatically with `get_colors()`.
     wheat1
     wheat4
 
+In addition, it's also possible to pass raw color;attr strings like so:
+
+    my $foo = fg('48;5;89;38;5;197;1;3;4;7', 'foo');
+
+Even though the fg() function is used, we set the following attributes:
+
+    background => 89
+    foreground => 197
+    bold
+    italic
+    underline
+    reverse
+
 # SEE ALSO
 
 [Term::ExtendedColor::Xresources](https://metacpan.org/pod/Term::ExtendedColor::Xresources), [Term::ExtendedColor::TTY](https://metacpan.org/pod/Term::ExtendedColor::TTY), [Term::ANSIColor](https://metacpan.org/pod/Term::ANSIColor)

@@ -6,7 +6,7 @@ BEGIN {
   use Exporter;
   use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
 
-  $VERSION = '0.242';
+  $VERSION = '0.300';
   @ISA     = qw(Exporter);
 
   @EXPORT_OK = qw(
@@ -463,11 +463,17 @@ sub _color {
   my($color_str, $data) = @_;
 
   my $access_by_numeric_index = 0;
+  my $access_by_raw_escape    = 0;
+
+# allow fg('38;5;220;1;3;5;7m', 'yellow with lots of attrs');
+  if($color_str =~ m/^([34]8;5;[\d;]+m?)/) {
+    $access_by_raw_escape = $1 =~ m/m$/ ? $1 : "$1m";
+  }
 
   # No key found in the table, and not using a valid number.
   # Return data if any, else the invalid color string.
   if( (! exists($color_names{$color_str})) and ($color_str !~ /^\d+$/m) ) {
-    return ($data) ? $data : $color_str;
+    return ($data) ? $data : $color_str unless $access_by_raw_escape;
   }
 
   # Foreground or background?
@@ -516,6 +522,9 @@ sub _color {
   for my $line(@output) {
     if($access_by_numeric_index) {
       $line = $color_str . $line . $end;
+    }
+    elsif($access_by_raw_escape) {
+      $line = "$start$access_by_raw_escape$line$end";
     }
     else {
       $line = "$start$color_names{$color_str}m$line$end";
@@ -991,6 +1000,19 @@ retrieved programmatically with C<get_colors()>.
   violet
   wheat1
   wheat4
+
+In addition, it's also possible to pass raw color;attr strings like so:
+
+    my $foo = fg('48;5;89;38;5;197;1;3;4;7', 'foo');
+
+Even though the fg() function is used, we set the following attributes:
+
+  background => 89
+  foreground => 197
+  bold
+  italic
+  underline
+  reverse
 
 =head1 SEE ALSO
 
