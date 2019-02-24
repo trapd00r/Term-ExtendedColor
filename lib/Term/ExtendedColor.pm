@@ -6,7 +6,7 @@ BEGIN {
   use Exporter;
   use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
 
-  $VERSION = '0.300';
+  $VERSION = '0.302';
   @ISA     = qw(Exporter);
 
   @EXPORT_OK = qw(
@@ -524,7 +524,7 @@ sub _color {
       $line = $color_str . $line . $end;
     }
     elsif($access_by_raw_escape) {
-      $line = "$start$access_by_raw_escape$line$end";
+      $line = "\e[$access_by_raw_escape$line$end";
     }
     else {
       $line = "$start$color_names{$color_str}m$line$end";
