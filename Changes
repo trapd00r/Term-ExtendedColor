@@ -1,4 +1,21 @@
-The Term::ExtendedColor project uses git for versioning. Please refer to
-the git repository if you're looking for a detailed list of changes.
+0.499: major rework since 0.302: possibly breaking someones code, somewhere.
 
-See https://github.com/trapd00r/Term-ExtendedColor
+       No longer reset all attributes upon calling attribute functions
+       in void context: only the relevant attribute will be reset. fg()
+       and bg() now resets the foreground and background color properly
+       when called with zero args.
+
+       The clear() function still resets all attributes.
+       See the scripts in examples/ directory.
+
+       Stop using 38;<attribute> since it's broken because of broken
+       implementation in terminals [0], [1].
+
+       Add a new feature that allows you to pass a raw combination of
+       colors and attributes to the coloring functions.
+
+       fg('38;5;197;48;5;53;1;3;4;5;7', 'this is perfectly legal');
+
+
+[0] http://leonerds-code.blogspot.com/2011/04/extended-colour-support-terminals-and.html
+[1] https://gist.github.com/trapd00r/f9229f80561de1199075f2e105d50629
