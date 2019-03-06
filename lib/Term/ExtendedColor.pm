@@ -1,12 +1,13 @@
 package Term::ExtendedColor;
 use strict;
 use warnings;
+use Carp;
 
 BEGIN {
   use Exporter;
   use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
 
-  $VERSION = '0.302';
+  $VERSION = '0.499';
   @ISA     = qw(Exporter);
 
   @EXPORT_OK = qw(
@@ -31,12 +32,31 @@ BEGIN {
 }
 
 {
-  no warnings;
+  no warnings 'once';
   *uncolour    = *Term::ExtendedColor::uncolor;
   *get_colours = *Term::ExtendedColor::get_colors;
 }
 
 our $AUTORESET = 1;
+
+my %attributes  = (
+  reset        => 0,
+  clear        => 0,
+  normal       => 0,
+  bold         => 1,
+  bright       => 1,
+  faint        => 2,
+  italic       => 3,
+  cursive      => 3,
+  underline    => 4,
+  underscore   => 4,
+  blink        => 5,
+  blink_ms     => 6,
+  reverse      => 7,
+  inverse      => 7,
+  negative     => 7,
+  conceal      => 8,
+);
 
 my %color_names = (
 
@@ -422,7 +442,6 @@ my %color_names = (
   violet            => '5;177',
   wheat1            => '5;229',
   wheat4            => '5;101',
-
 );
 
 our($fg_called, $bg_called);
@@ -430,65 +449,205 @@ our($fg_called, $bg_called);
 my ($fg, $bg) = ("\e[38;", "\e[48;");
 my($start, $end);
 
+
+=begin comment
+
+as of Term::ExtendedColor > 0.302:
+
+call to fg and bg with zero args resets only the relevant color to a
+default value. In earlier versions, the string
+
+  \e[m
+
+was returned which resets _all_ attributes.
+
+=end comment
+=cut
+
 sub fg {
-  # Call to fg() with zero args resets to defaults
-  if(!@_) {
-    return("\e[m");
-  }
+  return "\e[39m" if not defined $_[0];
+
   $fg_called = 1;
   _color(@_);
 }
 
 sub bg {
-  if(!@_) {
-    # \e[48;0m
-    # Will not work in xterm
-    return("\e[m");
-  }
+  return "\e[49m" if not defined $_[0];
 
   $bg_called = 1;
   _color(@_);
 }
 
 
-sub bold       { $fg_called = 1; _color('bold',      @_); }
-sub italic     { $fg_called = 1; _color('italic',    @_); }
-sub underline  { $fg_called = 1; _color('underline', @_); }
-sub inverse    { $fg_called = 1; _color('inverse',   @_); }
+
+=begin comment
+
+as of Term::ExtendedColor > 0.302:
+bold(), italic(), underline() and inverse() each has the ability to act as a
+switch where only a given attribute is switched off.
+
+    \e[22;23;24;25;27;28;29m
+
+not {bold, italic, underlined, blinking, inverse, hidden}
+
+is the same thing as
+
+    \e[m
+
+clear() still resets all attributes.
+
+=end comment
+=cut
+
+sub bold {
+  return "\e[22m" if not defined $_[0];
+
+  $fg_called = 1;
+  _color('bold', @_);
+}
+
+sub italic {
+  return "\e[23m" if not defined $_[0];
+
+  $fg_called = 1;
+  _color('italic', @_);
+}
+
+sub underline {
+  return "\e[24m" if not defined $_[0];
+
+  $fg_called = 1;
+  _color('underline', @_);
+}
+
+sub inverse {
+  return "\e27m" if not defined $_[0];
+
+  $fg_called = 1;
+  _color('inverse', @_);
+}
+
+sub clear {
+  defined(wantarray()) ? return "\e[m" : print "\e[m";
+}
+
 sub get_colors { return \%color_names; }
-sub clear      { defined(wantarray()) ? return "\e[m" : print "\e[m"; }
 
 
 sub _color {
   my($color_str, $data) = @_;
 
+  croak "no color str provided to Term::ExtendedColor" if ! defined $color_str;
+
   my $access_by_numeric_index = 0;
-  my $access_by_raw_escape    = 0;
+  my $access_by_raw_attr      = 0;
 
-# allow fg('38;5;220;1;3;5;7m', 'yellow with lots of attrs');
-  if($color_str =~ m/^([34]8;5;[\d;]+m?)/) {
-    $access_by_raw_escape = $1 =~ m/m$/ ? $1 : "$1m";
+=begin comment
+
+
+A normal escape sequence looks like
+
+    \e[38;5;220;1m
+
+But that's only because the implementation is broken. It *should* instead be
+
+    \e[38:5:220:1m
+
+We better support both.
+
+Here we support somewhat arbitary groups of colors/attributes, for
+complex cases, i.e:
+
+  38;5;197;48;5;53;1;3;4;5;7
+
+You'll rarely need this, but if you do, there's support for it.
+
+We also need to support possible variations of standard ANSI codes, i.e:
+
+
+  01;03;35
+  35;1;3
+
+=end comment
+=cut
+
+
+  if($color_str =~ m/^(?:\x1b\[)?([0-9;:]+m?)/) {
+    $access_by_raw_attr = $1 =~ m/m$/ ? $1 : "$1m";
   }
 
-  # No key found in the table, and not using a valid number.
-  # Return data if any, else the invalid color string.
-  if( (! exists($color_names{$color_str})) and ($color_str !~ /^\d+$/m) ) {
-    return ($data) ? $data : $color_str unless $access_by_raw_escape;
+
+# No key found in the table, and not using a valid number.
+# Return data if any, else the invalid color string.
+  if( (! exists($color_names{$color_str})) and ($color_str !~ /^[0-9]+$/m) ) {
+    return ($data) ? $data : $color_str unless $access_by_raw_attr;
   }
 
-  # Foreground or background?
+# Foreground or background?
   ($start) = ($fg_called) ? "\e[38;" : "\e[48;";
   ($end)   = ($AUTORESET) ? "\e[m"  : '';
 
-  # Allow access to not defined color values: fg(221);
+# this is because we need to handle attributes differently thanks to
+# broken implementation at various places
+  ($start) = exists($attributes{$color_str}) ? "\e[" : $start;
+
+=begin comment
+
+This is messy. According to spec...
+
+  38;1
+
+should yield bold, and it does in urxvt and vte, but not in xterm.
+
+  38;1;3;4;5;7
+
+should yield bold + italic + underline + blink + reverse
+
+which it does in urxvt and vte, but in xterm it yields italic +
+underline + blink + reverse
+
+ON THE OTHER HAND
+
+  38:5;1
+  38:5;1;2;3;4;5;6
+
+yields attributes correctly in xterm, urxvt and vte.
+
+HOWEVER
+
+  38;5;220
+
+yields yellow text, and
+
+  38;5;220;5
+
+yields yellow, blinking text, but
+
+  38:5;220;5
+
+yields blinking non-colored text.
+
+Ergo, no safe way of adding color and attributes in the same sequence,
+so if we want to add bold, italic, underline and color index 220 to
+input, we would have to do
+
+  38:5;1;3;7;38;5;220
+
+
+=end comment
+
+=cut
+
+
+# Allow access to not defined color values: fg(221);
   if( ($color_str =~ /^\d+$/m) and ($color_str < 256) and ($color_str > -1) ) {
     $color_str = $start . "5;$color_str" . 'm';
     $access_by_numeric_index = 1;
   }
 
-  # Called with no data. The only useful operation here is to return the
-  # attribute code with no end sequence. Basicly the same thing as if $AUTORESET
-  # == 0.
+# Called with no data. The only useful operation here is to return the
+# attribute code with no end sequence. Basicly the same thing as if
+# $AUTORESET == 0.
   if(!defined($data)) { # 0 is a valid argument
     return ($access_by_numeric_index)
       ? $color_str
@@ -497,7 +656,7 @@ sub _color {
   }
 
   {
-    # This is for operations like fg('bold', fg('red1'));
+# This is for operations like fg('bold', fg('red1'));
     no warnings; # For you, Test::More
     if($data =~ /;(\d+;\d+)m$/m) {
       my $esc = $1;
@@ -523,15 +682,15 @@ sub _color {
     if($access_by_numeric_index) {
       $line = $color_str . $line . $end;
     }
-    elsif($access_by_raw_escape) {
-      $line = "\e[$access_by_raw_escape$line$end";
+    elsif($access_by_raw_attr) {
+      $line = "\e[$access_by_raw_attr$line$end";
     }
     else {
       $line = "$start$color_names{$color_str}m$line$end";
     }
   }
 
-  # Restore state
+# Restore state
   ($fg_called, $bg_called) = (0, 0);
 
   return (wantarray()) ? (@output) : (join('', @output));
@@ -547,7 +706,7 @@ sub uncolor {
   }
 
   for(@data) {
-    # Test::More enables warnings..
+# Test::More enables warnings..
     if(defined($_)) {
       $_ =~ s/\e\[[0-9;]*m//gm;
     }
@@ -665,6 +824,8 @@ Two tags are provided for convience:
 
   my $arbitary_color = fg(4, 'This is colored in the fifth ANSI color');
 
+  my $raw_seq = fg('38;5;197;48;5;53;1;3;4;5;7', 'this works too');
+
 Set foreground colors and attributes.
 
 See L<COLORS AND ATTRIBUTES> for valid first arguments. Additionally, colors can
@@ -694,6 +855,8 @@ value.
 
 If an invalid attribute is passed, the original data will be returned
 unmodified.
+
+If no attribute is passed, thrown an exception.
 
 =head2 bg($color, $string)
 
@@ -735,18 +898,30 @@ Turn autoreset on/off. Enabled by default.
 
 Convenience function that might be used in place of C<fg('bold', \@data)>;
 
+When called without arguments, returns a a string that turns off the
+bold attribute.
+
 =head2 italic(\@data)
 
 Convenience function that might be used in place of C<fg('italic', \@data)>;
+
+When called without arguments, returns a a string that turns off the
+italics attribute.
 
 =head2 underline(\@data)
 
 Convenience function that might be used in place of C<fg('underline', \@data)>;
 
+When called without arguments, returns a a string that turns off the
+underline attribute.
+
 =head2 inverse(\@data)
 
 Reverse video / inverse.
 Convenience function that might be used in place of C<fg('inverse', \@data)>;
+
+When called without arguments, returns a a string that turns off the
+inverse attribute.
 
 =head1 NOTES
 
@@ -1016,13 +1191,16 @@ Even though the fg() function is used, we set the following attributes:
 
 =head1 SEE ALSO
 
-L<Term::ExtendedColor::Xresources>, L<Term::ExtendedColor::TTY>, L<Term::ANSIColor>
+L<Term::ExtendedColor::Xresources>
+L<Term::ExtendedColor::TTY>
+L<Term::ANSIColor>
 
 =head1 AUTHOR
 
   Magnus Woldrich
   CPAN ID: WOLDRICH
   m@japh.se
+  http://github.com/trapd00r
   http://japh.se
 
 =head1 CONTRIBUTORS
