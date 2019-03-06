@@ -1,5 +1,6 @@
 #!/usr/bin/perl
-# nowadays dmesg is already colored so this is kinda obsolete. :)
+# nowadays dmesg is already colored so this is kinda obsolete, even
+# though I prefer my coloring myself.
 
 use strict;
 use Term::ExtendedColor qw(fg bg);
