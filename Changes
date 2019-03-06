@@ -1,4 +1,4 @@
-0.499  2019-03-06
+0.502  2019-03-06
   - No longer reset all attributes upon calling attribute functions with
     zero args. Only the relevant attribute will be reset.
   - Calling fg() and bg() with zero args will now reset the foreground /
