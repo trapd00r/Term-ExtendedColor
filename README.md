@@ -92,6 +92,8 @@ Two tags are provided for convience:
 
     my $arbitary_color = fg(4, 'This is colored in the fifth ANSI color');
 
+    my $raw_seq = fg('38;5;197;48;5;53;1;3;4;5;7', 'this works too');
+
 Set foreground colors and attributes.
 
 See ["COLORS AND ATTRIBUTES"](#colors-and-attributes) for valid first arguments. Additionally, colors can
@@ -121,6 +123,8 @@ value.
 
 If an invalid attribute is passed, the original data will be returned
 unmodified.
+
+If no attribute is passed, thrown an exception.
 
 ## bg($color, $string)
 
@@ -162,18 +166,30 @@ Turn autoreset on/off. Enabled by default.
 
 Convenience function that might be used in place of `fg('bold', \@data)`;
 
+When called without arguments, returns a a string that turns off the
+bold attribute.
+
 ## italic(\\@data)
 
 Convenience function that might be used in place of `fg('italic', \@data)`;
+
+When called without arguments, returns a a string that turns off the
+italics attribute.
 
 ## underline(\\@data)
 
 Convenience function that might be used in place of `fg('underline', \@data)`;
 
+When called without arguments, returns a a string that turns off the
+underline attribute.
+
 ## inverse(\\@data)
 
 Reverse video / inverse.
 Convenience function that might be used in place of `fg('inverse', \@data)`;
+
+When called without arguments, returns a a string that turns off the
+inverse attribute.
 
 # NOTES
 
@@ -443,13 +459,16 @@ Even though the fg() function is used, we set the following attributes:
 
 # SEE ALSO
 
-[Term::ExtendedColor::Xresources](https://metacpan.org/pod/Term::ExtendedColor::Xresources), [Term::ExtendedColor::TTY](https://metacpan.org/pod/Term::ExtendedColor::TTY), [Term::ANSIColor](https://metacpan.org/pod/Term::ANSIColor)
+[Term::ExtendedColor::Xresources](https://metacpan.org/pod/Term::ExtendedColor::Xresources)
+[Term::ExtendedColor::TTY](https://metacpan.org/pod/Term::ExtendedColor::TTY)
+[Term::ANSIColor](https://metacpan.org/pod/Term::ANSIColor)
 
 # AUTHOR
 
     Magnus Woldrich
     CPAN ID: WOLDRICH
     m@japh.se
+    http://github.com/trapd00r
     http://japh.se
 
 # CONTRIBUTORS
