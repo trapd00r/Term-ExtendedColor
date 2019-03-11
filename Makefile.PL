@@ -4,13 +4,20 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile1(
   META_MERGE => {
-    q(meta-spec) => { version => 2 },
+    q(meta-spec) => {
+      version => 2
+    },
+
     resources => {
+      homepage   => q{http://japh.se/},
+      bugtracker => {
+        web    => q{https://github.com/trapd00r/Term-ExtendedColor/issues},
+        mailto => q{m@japh.se},
+      },
       repository => {
-        type       => 'git',
-        url        => 'https://github.com/trapd00r/Term-ExtendedColor.git',
-        web        => 'https://github.com/trapd00r/Term-ExtendedColor',
-        bugtracker => 'https://github.com/trapd00r/Term-ExtendedColor/issues',
+        type  => 'git',
+        url   => 'https://github.com/trapd00r/Term-ExtendedColor.git',
+        web   => 'https://github.com/trapd00r/Term-ExtendedColor',
       },
     },
   },
