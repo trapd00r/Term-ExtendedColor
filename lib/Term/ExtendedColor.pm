@@ -7,7 +7,7 @@ BEGIN {
   use Exporter;
   use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
 
-  $VERSION = '0.503';
+  $VERSION = '0.504';
   @ISA     = qw(Exporter);
 
   @EXPORT_OK = qw(
@@ -863,7 +863,7 @@ If no attribute is passed, thrown an exception.
   my $green_bg = bg('green4', 'green background');
   my @blue_bg  = bg('blue6',  ['blue background']);
 
-Like C<fg()>, but sets background colors.
+Like C<fg()>, but sets background color.
 
 =head2 uncolor($string) | uncolour($string)
 
